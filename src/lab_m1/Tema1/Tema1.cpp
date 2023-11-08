@@ -88,9 +88,9 @@ void m1::Tema1::CreateNewEnemy(const std::string name1,
     meshes.erase(name1);
     meshes.erase(name2);
     enemies[index] = object2D::CreateEnemy1(name1, position1, 50, enemyColor, true);
-    enemies[index + 9] = object2D::CreateEnemy1(name2, position2, 40, glm::vec3(0, 1, 0.75), true);
+    enemies[index + 3] = object2D::CreateEnemy1(name2, position2, 40, glm::vec3(0, 1, 0.75), true);
     AddMeshToList(enemies[index]);
-    AddMeshToList(enemies[index + 9]);
+    AddMeshToList(enemies[index + 3]);
     RenderMesh2D(meshes[name1], shaders["VertexColor"], matrix);
     RenderMesh2D(meshes[name2], shaders["VertexColor"], matrix);
 }
@@ -356,15 +356,18 @@ void Tema1::Update(float deltaTimeSeconds)
 
                 if (line == 0) {
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 310, 1),
-                        glm::vec3(1200, 320, 2), i, color, enemyColor1, modelMatrix, meshes, shaders);
+                        glm::vec3(1200, 320, 2), line, color, enemyColor1, modelMatrix, meshes, shaders);
+                    map[i] = line;
                 }
                 else if (line == 1) {
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 165, 1),
-                        glm::vec3(1200, 175, 2), i, color, enemyColor2, modelMatrix, meshes, shaders);
+                        glm::vec3(1200, 175, 2), line, color, enemyColor2, modelMatrix, meshes, shaders);
+                    map[i] = line;
                 }
                 else if (line == 2) {
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 20, 1),
-                        glm::vec3(1200, 30, 2), i, color, enemyColor3, modelMatrix, meshes, shaders);
+                        glm::vec3(1200, 30, 2), line, color, enemyColor3, modelMatrix, meshes, shaders);
+                    map[i] = line;
                 }
 
                 break;
@@ -390,15 +393,14 @@ void Tema1::Update(float deltaTimeSeconds)
                 translateX[i] = 100;
                 isMoving[i] = false;
                 meshes.erase("life" + std::to_string(lives_no--));
-                cout << i << endl;
             }
         }
     }
 
     for (int i = 0; i < 9; i++) {
         modelMatrix = glm::mat3(1);
-        if (!isEmptyCell[i] && isMoving[i]) {
-            if (line == 0) {
+        if (!isEmptyCell[i]) {
+            if (line == 0 && enemyColor1 == draggedColor) {
                 projectiles[i] = object2D::CreateStar("projectile" + std::to_string(i + 1), glm::vec3(x_projectile[i], y_projectile[i], 2), 15, draggedColor, true);
                 AddMeshToList(projectiles[i]);
 
@@ -423,12 +425,12 @@ void Tema1::Update(float deltaTimeSeconds)
                 float l = 15 * sqrt(3 * sine * sine + 2 * sine) / 2;
                 float y = sqrt(225 - pentagoneLength * pentagoneLength);
 
-                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[i], 360, l + y, hexagoneRadius)) {
+                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[0], 360, l + y, hexagoneRadius)) {
                     tx[i] == 0;
                     meshes.erase("projectile" + std::to_string(i + 1));
                 }
             }
-            else if (line == 1) {
+            else if (line == 1 && enemyColor2 == draggedColor) {
                 projectiles[i] = object2D::CreateStar("projectile" + std::to_string(i + 1), glm::vec3(x_projectile[i], y_projectile[i], 2), 15, draggedColor, true);
                 AddMeshToList(projectiles[i]);
 
@@ -453,12 +455,12 @@ void Tema1::Update(float deltaTimeSeconds)
                 float l = 15 * sqrt(3 * sine * sine + 2 * sine) / 2;
                 float y = sqrt(225 - pentagoneLength * pentagoneLength);
 
-                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[i], 215, l + y, hexagoneRadius)) {
+                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[1], 215, l + y, hexagoneRadius)) {
                     tx[i] == 0;
                     meshes.erase("projectile" + std::to_string(i + 1));
                 }
             }
-            else if (line == 2) {
+            else if (line == 2 && enemyColor3 == draggedColor) {
                 projectiles[i] = object2D::CreateStar("projectile" + std::to_string(i + 1), glm::vec3(x_projectile[i], y_projectile[i], 2), 15, draggedColor, true);
                 AddMeshToList(projectiles[i]);
 
@@ -483,7 +485,7 @@ void Tema1::Update(float deltaTimeSeconds)
                 float l = 15 * sqrt(3 * sine * sine + 2 * sine) / 2;
                 float y = sqrt(225 - pentagoneLength * pentagoneLength);
 
-                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[i], 70, l + y, hexagoneRadius)) {
+                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[2], 70, l + y, hexagoneRadius)) {
                     tx[i] == 0;
                     meshes.erase("projectile" + std::to_string(i + 1));
                 }
@@ -491,97 +493,206 @@ void Tema1::Update(float deltaTimeSeconds)
         }
     }
 
-    if (line == 0) {
-        if ((CheckCollision(150, 355, 1200 + translateX[0], 360, diamondRadius, hexagoneRadius) ||
-            CheckCollision(150, 355, 1200 + translateX[1], 360, diamondRadius, hexagoneRadius) ||
-            CheckCollision(150, 355, 1200 + translateX[2], 360, diamondRadius, hexagoneRadius))
-            && !isEmptyCell[0]) {
-            modelMatrix = glm::mat3(1);
-            checkScale[0] = true;
-            sx -= 2 * deltaTimeSeconds;
-            sy -= 2 * deltaTimeSeconds;
 
-            modelMatrix *= transform2D::Translate(150, 355);
-            modelMatrix *= transform2D::Scale(sx, sy);
-            modelMatrix *= transform2D::Translate(-150, -355);
-            RenderMesh2D(meshes["diamond" + std::to_string(0 + 1)], shaders["VertexColor"], modelMatrix);
+    if ((CheckCollision(150, 355, 1200 + translateX[0], 360, diamondRadius, hexagoneRadius) && map[0] == 0)
+        || (CheckCollision(150, 355, 1200 + translateX[1], 360, diamondRadius, hexagoneRadius) && map[1] == 0)
+        || (CheckCollision(150, 355, 1200 + translateX[2], 360, diamondRadius, hexagoneRadius) && map[2] == 0)
+        && !isEmptyCell[0]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[0] = true;
+        scaleX[0] -= 2 * deltaTimeSeconds;
+        scaleY[0] -= 2 * deltaTimeSeconds;
 
-            if (sx <= 0 && sy <= 0) {
-                sx = 1;
-                sy = 1;
-                isEmptyCell[0] = true;
-                checkScale[0] = false;
-                meshes.erase("diamond" + std::to_string(0 + 1));
-            }
+        modelMatrix *= transform2D::Translate(150, 355);
+        modelMatrix *= transform2D::Scale(scaleX[0], scaleY[0]);
+        modelMatrix *= transform2D::Translate(-150, -355);
+        RenderMesh2D(meshes["diamond" + std::to_string(0 + 1)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleX[0] <= 0 && scaleY[0] <= 0) {
+            scaleX[0] = 1;
+            scaleY[0] = 1;
+            isEmptyCell[0] = true;
+            checkScale[0] = false;
+            meshes.erase("diamond" + std::to_string(0 + 1));
         }
     }
+    if ((CheckCollision(280, 355, 1200 + translateX[0], 360, diamondRadius, hexagoneRadius) && map[0] == 0)
+        || (CheckCollision(280, 355, 1200 + translateX[1], 360, diamondRadius, hexagoneRadius) && map[1] == 0)
+        || (CheckCollision(280, 355, 1200 + translateX[2], 360, diamondRadius, hexagoneRadius) && map[2] == 0)
+        && !isEmptyCell[1]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[1] = true;
+        scaleX[1] -= 2 * deltaTimeSeconds;
+        scaleY[1] -= 2 * deltaTimeSeconds;
 
-    /*for (int i = 0; i < 3; i++) {
-        if (CheckCollision(centers[0][i], centers[1][i], 1200 + translateX[i], 360, diamondRadius, hexagoneRadius) && !isEmptyCell[i]) {
-            modelMatrix = glm::mat3(1);
-            checkScale[i] = true;
-            sx -= 2 * deltaTimeSeconds;
-            sy -= 2 * deltaTimeSeconds;
+        modelMatrix *= transform2D::Translate(280, 355);
+        modelMatrix *= transform2D::Scale(scaleX[1], scaleY[1]);
+        modelMatrix *= transform2D::Translate(-280, -355);
+        RenderMesh2D(meshes["diamond" + std::to_string(1 + 1)], shaders["VertexColor"], modelMatrix);
 
-            modelMatrix *= transform2D::Translate(centers[0][i], centers[1][i]);
-            modelMatrix *= transform2D::Scale(sx, sy);
-            modelMatrix *= transform2D::Translate(-centers[0][i], -centers[1][i]);
-            RenderMesh2D(meshes["diamond" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
-
-            if (sx <= 0 && sy <= 0) {
-                sx = 1;
-                sy = 1;
-                isEmptyCell[i] = true;
-                checkScale[i] = false;
-                disappear[i] = false;
-                meshes.erase("diamond" + std::to_string(i + 1));
-            }
+        if (scaleX[1] <= 0 && scaleY[1] <= 0) {
+            scaleX[1] = 1;
+            scaleY[1] = 1;
+            isEmptyCell[1] = true;
+            checkScale[1] = false;
+            meshes.erase("diamond" + std::to_string(1 + 1));
         }
     }
-    for (int i = 3; i < 6; i++) {
-        if (CheckCollision(centers[0][i], centers[1][i], 1200 + translateX[i], 215, diamondRadius, hexagoneRadius) && !isEmptyCell[i]) {
-            modelMatrix = glm::mat3(1);
-            checkScale[i] = true;
-            sx -= 2 * deltaTimeSeconds;
-            sy -= 2 * deltaTimeSeconds;
+    if ((CheckCollision(410, 355, 1200 + translateX[0], 360, diamondRadius, hexagoneRadius) && map[0] == 0)
+        || (CheckCollision(410, 355, 1200 + translateX[1], 360, diamondRadius, hexagoneRadius) && map[1] == 0)
+        || (CheckCollision(410, 355, 1200 + translateX[2], 360, diamondRadius, hexagoneRadius) && map[2] == 0)
+        && !isEmptyCell[2]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[2] = true;
+        scaleX[2] -= 2 * deltaTimeSeconds;
+        scaleY[2] -= 2 * deltaTimeSeconds;
 
-            modelMatrix *= transform2D::Translate(centers[0][i], centers[1][i]);
-            modelMatrix *= transform2D::Scale(sx, sy);
-            modelMatrix *= transform2D::Translate(-centers[0][i], -centers[1][i]);
-            RenderMesh2D(meshes["diamond" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
+        modelMatrix *= transform2D::Translate(410, 355);
+        modelMatrix *= transform2D::Scale(scaleX[2], scaleY[2]);
+        modelMatrix *= transform2D::Translate(-410, -355);
+        RenderMesh2D(meshes["diamond" + std::to_string(2 + 1)], shaders["VertexColor"], modelMatrix);
 
-            if (sx <= 0 && sy <= 0) {
-                sx = 1;
-                sy = 1;
-                isEmptyCell[i] = true;
-                checkScale[i] = false;
-                disappear[i] = false;
-                meshes.erase("diamond" + std::to_string(i + 1));
-            }
+        if (scaleX[2] <= 0 && scaleY[2] <= 0) {
+            scaleX[2] = 1;
+            scaleY[2] = 1;
+            isEmptyCell[2] = true;
+            checkScale[2] = false;
+            meshes.erase("diamond" + std::to_string(2 + 1));
         }
     }
-    for (int i = 6; i < 9; i++) {
-        if (CheckCollision(centers[0][i], centers[1][i], 1200 + translateX[i], 70, diamondRadius, hexagoneRadius) && !isEmptyCell[i]) {
-            modelMatrix = glm::mat3(1);
-            checkScale[i] = true;
-            sx -= 2 * deltaTimeSeconds;
-            sy -= 2 * deltaTimeSeconds;
+    if ((CheckCollision(150, 210, 1200 + translateX[0], 215, diamondRadius, hexagoneRadius) && map[0] == 1)
+        || (CheckCollision(150, 210, 1200 + translateX[1], 215, diamondRadius, hexagoneRadius) && map[1] == 1)
+        || (CheckCollision(150, 210, 1200 + translateX[2], 215, diamondRadius, hexagoneRadius) && map[2] == 1)
+        && !isEmptyCell[3]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[3] = true;
+        scaleX[3] -= 2 * deltaTimeSeconds;
+        scaleY[3] -= 2 * deltaTimeSeconds;
 
-            modelMatrix *= transform2D::Translate(centers[0][i], centers[1][i]);
-            modelMatrix *= transform2D::Scale(sx, sy);
-            modelMatrix *= transform2D::Translate(-centers[0][i], -centers[1][i]);
-            RenderMesh2D(meshes["diamond" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
+        modelMatrix *= transform2D::Translate(150, 210);
+        modelMatrix *= transform2D::Scale(scaleX[3], scaleY[3]);
+        modelMatrix *= transform2D::Translate(-150, -210);
+        RenderMesh2D(meshes["diamond" + std::to_string(3 + 1)], shaders["VertexColor"], modelMatrix);
 
-            if (sx <= 0 && sy <= 0) {
-                sx = 1;
-                sy = 1;
-                isEmptyCell[i] = true;
-                checkScale[i] = false;
-                disappear[i] = false;
-                meshes.erase("diamond" + std::to_string(i + 1));
-            }
+        if (scaleX[3] <= 0 && scaleY[3] <= 0) {
+            scaleX[3] = 1;
+            scaleY[3] = 1;
+            isEmptyCell[3] = true;
+            checkScale[3] = false;
+            meshes.erase("diamond" + std::to_string(3 + 1));
         }
-    }*/
+    }
+    if ((CheckCollision(280, 210, 1200 + translateX[0], 215, diamondRadius, hexagoneRadius) && map[0] == 1)
+        || (CheckCollision(280, 210, 1200 + translateX[1], 215, diamondRadius, hexagoneRadius) && map[1] == 1)
+        || (CheckCollision(280, 210, 1200 + translateX[2], 215, diamondRadius, hexagoneRadius) && map[2] == 1)
+        && !isEmptyCell[4]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[4] = true;
+        scaleX[4] -= 2 * deltaTimeSeconds;
+        scaleY[4] -= 2 * deltaTimeSeconds;
+
+        modelMatrix *= transform2D::Translate(280, 210);
+        modelMatrix *= transform2D::Scale(scaleX[4], scaleY[4]);
+        modelMatrix *= transform2D::Translate(-280, -210);
+        RenderMesh2D(meshes["diamond" + std::to_string(4 + 1)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleX[4] <= 0 && scaleY[4] <= 0) {
+            scaleX[4] = 1;
+            scaleY[4] = 1;
+            isEmptyCell[4] = true;
+            checkScale[4] = false;
+            meshes.erase("diamond" + std::to_string(4 + 1));
+        }
+    }
+    if ((CheckCollision(410, 210, 1200 + translateX[0], 215, diamondRadius, hexagoneRadius) && map[0] == 1)
+        || (CheckCollision(410, 210, 1200 + translateX[1], 215, diamondRadius, hexagoneRadius) && map[1] == 1)
+        || (CheckCollision(410, 210, 1200 + translateX[2], 215, diamondRadius, hexagoneRadius) && map[2] == 1)
+        && !isEmptyCell[5]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[5] = true;
+        scaleX[5] -= 2 * deltaTimeSeconds;
+        scaleY[5] -= 2 * deltaTimeSeconds;
+
+        modelMatrix *= transform2D::Translate(410, 210);
+        modelMatrix *= transform2D::Scale(scaleX[5], scaleY[5]);
+        modelMatrix *= transform2D::Translate(-410, -210);
+        RenderMesh2D(meshes["diamond" + std::to_string(5 + 1)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleX[5] <= 0 && scaleY[5] <= 0) {
+            scaleX[5] = 1;
+            scaleY[5] = 1;
+            isEmptyCell[5] = true;
+            checkScale[5] = false;
+            meshes.erase("diamond" + std::to_string(5 + 1));
+        }
+    }
+    if ((CheckCollision(150, 65, 1200 + translateX[0], 70, diamondRadius, hexagoneRadius) && map[0] == 2)
+        || (CheckCollision(150, 65, 1200 + translateX[1], 70, diamondRadius, hexagoneRadius) && map[1] == 2)
+        || (CheckCollision(150, 65, 1200 + translateX[2], 70, diamondRadius, hexagoneRadius) && map[2] == 2)
+        && !isEmptyCell[6]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[6] = true;
+        scaleX[6] -= 2 * deltaTimeSeconds;
+        scaleY[6] -= 2 * deltaTimeSeconds;
+
+        modelMatrix *= transform2D::Translate(150, 65);
+        modelMatrix *= transform2D::Scale(scaleX[6], scaleY[6]);
+        modelMatrix *= transform2D::Translate(-150, -65);
+        RenderMesh2D(meshes["diamond" + std::to_string(6 + 1)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleX[6] <= 0 && scaleY[6] <= 0) {
+            scaleX[6] = 1;
+            scaleY[6] = 1;
+            isEmptyCell[6] = true;
+            checkScale[6] = false;
+            meshes.erase("diamond" + std::to_string(6 + 1));
+        }
+    }
+    if ((CheckCollision(280, 65, 1200 + translateX[0], 70, diamondRadius, hexagoneRadius) && map[0] == 2)
+        || (CheckCollision(280, 65, 1200 + translateX[1], 70, diamondRadius, hexagoneRadius) && map[1] == 2)
+        || (CheckCollision(280, 65, 1200 + translateX[2], 70, diamondRadius, hexagoneRadius) && map[2] == 2)
+        && !isEmptyCell[7]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[7] = true;
+        scaleX[7] -= 2 * deltaTimeSeconds;
+        scaleY[7] -= 2 * deltaTimeSeconds;
+
+        modelMatrix *= transform2D::Translate(280, 65);
+        modelMatrix *= transform2D::Scale(scaleX[7], scaleY[7]);
+        modelMatrix *= transform2D::Translate(-280, -65);
+        RenderMesh2D(meshes["diamond" + std::to_string(7 + 1)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleX[7] <= 0 && scaleY[7] <= 0) {
+            scaleX[7] = 1;
+            scaleY[7] = 1;
+            isEmptyCell[7] = true;
+            checkScale[7] = false;
+            meshes.erase("diamond" + std::to_string(7 + 1));
+        }
+    }
+    if ((CheckCollision(410, 65, 1200 + translateX[0], 70, diamondRadius, hexagoneRadius) && map[0] == 2)
+        || (CheckCollision(410, 65, 1200 + translateX[1], 70, diamondRadius, hexagoneRadius) && map[1] == 2)
+        || (CheckCollision(410, 65, 1200 + translateX[2], 70, diamondRadius, hexagoneRadius) && map[2] == 2)
+        && !isEmptyCell[8]) {
+        modelMatrix = glm::mat3(1);
+        checkScale[8] = true;
+        scaleX[8] -= 2 * deltaTimeSeconds;
+        scaleY[8] -= 2 * deltaTimeSeconds;
+
+        modelMatrix *= transform2D::Translate(410, 65);
+        modelMatrix *= transform2D::Scale(scaleX[8], scaleY[8]);
+        modelMatrix *= transform2D::Translate(-410, -65);
+        RenderMesh2D(meshes["diamond" + std::to_string(8 + 1)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleX[8] <= 0 && scaleY[8] <= 0) {
+            scaleX[8] = 1;
+            scaleY[8] = 1;
+            isEmptyCell[8] = true;
+            checkScale[8] = false;
+            meshes.erase("diamond" + std::to_string(8 + 1));
+        }
+    }
+    
 
     //if (lives_no == 0) {
     //    exit(0);

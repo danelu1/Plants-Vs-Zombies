@@ -135,5 +135,7 @@ namespace m1
         bool isDragged[4];
         bool isPressed;
         int index;
+
+        std::unordered_map<int, int> map;
     };
 }   // namespace m1
