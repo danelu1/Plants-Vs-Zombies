@@ -14,6 +14,9 @@ using namespace m1;
  *  To find out more about `FrameStart`, `Update`, `FrameEnd`
  *  and the order in which they are called, see `world.cpp`.
  */
+bool CheckColor(glm::vec3 color, glm::vec3 color1, glm::vec3 color2, glm::vec3 color3) {
+    return (color == color1) || (color == color2) || (color == color3);
+}
 
 bool CheckCollision(float x1, float y1, float x2, float y2, float radius1, float radius2) {
     glm::vec3 p1 = glm::vec3(x1, y1, 1);
@@ -49,7 +52,7 @@ void Tema1::DisplayDiamond(const std::string& name,
         }
     }
 
-    glm::mat3 initialMatrix = matrix; // Store the initial matrix
+    glm::mat3 initialMatrix = matrix;
 
     matrix *= transform2D::Translate(cx, cy);
     matrix *= transform2D::Scale(sx, sy);
@@ -60,7 +63,7 @@ void Tema1::DisplayDiamond(const std::string& name,
     matrix = initialMatrix;
 }
 
-void m1::Tema1::CreateNewEnemy(const std::string name1,
+void Tema1::CreateNewEnemy(const std::string name1,
     const std::string name2,
     Mesh* enemies[],
     glm::vec3 position1,
@@ -95,6 +98,145 @@ void m1::Tema1::CreateNewEnemy(const std::string name1,
     RenderMesh2D(meshes[name2], shaders["VertexColor"], matrix);
 }
 
+void Tema1::KillEnemy(const std::string name1,
+    const std::string name2,
+    float time,
+    int line,
+    float x,
+    glm::vec3 color,
+    int* enemyLives,
+    std::unordered_map<int, int> map,
+    float* translateX,
+    float* tx,
+    float* scaleEnemyX,
+    float* scaleEnemyY,
+    bool* isMoving,
+    glm::mat3& modelMatrix,
+    std::unordered_map<std::string, Mesh*>& meshes,
+    std::unordered_map<std::string, Shader*> shaders)
+{
+    if (enemyLives[0] >= 3 && map[0] == line) {
+        enemyLives[0] = 3;
+        glm::mat3 matrix = modelMatrix;
+
+        scaleOut[0] = true;
+        scaleIn[0] = true;
+
+        meshes.erase(name1 + std::to_string(1));
+        meshes.erase(name2 + std::to_string(1));
+        enemies[0] = object2D::CreateEnemy1(name1 + std::to_string(1), glm::vec3(distance[0], x, 1), 50, color, true);
+        enemies[3] = object2D::CreateEnemy1(name2 + std::to_string(1), glm::vec3(distance[0], x + 10, 2), 40, glm::vec3(0, 1, 0.75), true);
+        AddMeshToList(enemies[0]);
+        AddMeshToList(enemies[3]);
+
+        scaleEnemyX[0] -= time;
+        scaleEnemyY[0] -= time;
+
+        modelMatrix *= transform2D::Translate(distance[0], x + 50);
+        modelMatrix *= transform2D::Scale(scaleEnemyX[0], scaleEnemyY[0]);
+        modelMatrix *= transform2D::Translate(-distance[0], -(x + 50));
+        RenderMesh2D(meshes[name1 + std::to_string(1)], shaders["VertexColor"], modelMatrix);
+        RenderMesh2D(meshes[name2 + std::to_string(1)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleEnemyX[0] <= 0 && scaleEnemyY[0] <= 0) {
+            translateX[0] = 100;
+            enemyLives[0] = 0;
+            isMoving[0] = false;
+            scaleEnemyX[0] = 1;
+            scaleEnemyY[0] = 1;
+            meshes.erase(name1 + std::to_string(1));
+            meshes.erase(name2 + std::to_string(1));
+            tx[3 * line] = 0;
+            tx[3 * line + 1] = 0;
+            tx[3 * line + 2] = 0;
+            scaleOut[0] = false;
+            scaleIn[0] = false;
+            cout << enemyLives[0] << endl;
+        }
+        modelMatrix = matrix;
+    }
+    if (enemyLives[1] >= 3 && map[1] == line) {
+        enemyLives[1] = 3;
+        glm::mat3 matrix = modelMatrix;
+
+        scaleOut[1] = true;
+        scaleIn[1] = true;
+
+        meshes.erase(name1 + std::to_string(2));
+        meshes.erase(name2 + std::to_string(2));
+        enemies[1] = object2D::CreateEnemy1(name1 + std::to_string(2), glm::vec3(distance[1], x, 1), 50, color, true);
+        enemies[4] = object2D::CreateEnemy1(name2 + std::to_string(2), glm::vec3(distance[1], x + 10, 2), 40, glm::vec3(0, 1, 0.75), true);
+        AddMeshToList(enemies[1]);
+        AddMeshToList(enemies[4]);
+
+        scaleEnemyX[1] -= time;
+        scaleEnemyY[1] -= time;
+
+        modelMatrix *= transform2D::Translate(distance[1], x + 50);
+        modelMatrix *= transform2D::Scale(scaleEnemyX[1], scaleEnemyY[1]);
+        modelMatrix *= transform2D::Translate(-distance[1], -(x + 50));
+        RenderMesh2D(meshes[name1 + std::to_string(2)], shaders["VertexColor"], modelMatrix);
+        RenderMesh2D(meshes[name2 + std::to_string(2)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleEnemyX[1] <= 0 && scaleEnemyY[1] <= 0) {
+            translateX[1] = 100;
+            enemyLives[1] = 0;
+            isMoving[1] = false;
+            scaleEnemyX[1] = 1;
+            scaleEnemyY[1] = 1;
+            meshes.erase(name1 + std::to_string(2));
+            meshes.erase(name2 + std::to_string(2));
+            tx[3 * line] = 0;
+            tx[3 * line + 1] = 0;
+            tx[3 * line + 2] = 0;
+            scaleOut[1] = false;
+            scaleIn[1] = false;
+            cout << enemyLives[1] << endl;
+        }
+        modelMatrix = matrix;
+    }
+    if (enemyLives[2] >= 3 && map[2] == line) {
+        enemyLives[2] = 3;
+        glm::mat3 matrix = modelMatrix;
+
+        scaleOut[2] = true;
+        scaleIn[2] = true;
+
+        meshes.erase(name1 + std::to_string(3));
+        meshes.erase(name2 + std::to_string(3));
+        enemies[2] = object2D::CreateEnemy1(name1 + std::to_string(3), glm::vec3(distance[2], x, 1), 50, color, true);
+        enemies[5] = object2D::CreateEnemy1(name2 + std::to_string(3), glm::vec3(distance[2], x + 10, 2), 40, glm::vec3(0, 1, 0.75), true);
+        AddMeshToList(enemies[2]);
+        AddMeshToList(enemies[5]);
+
+        scaleEnemyX[2] -= time;
+        scaleEnemyY[2] -= time;
+
+        modelMatrix *= transform2D::Translate(distance[2], x + 50);
+        modelMatrix *= transform2D::Scale(scaleEnemyX[2], scaleEnemyY[2]);
+        modelMatrix *= transform2D::Translate(-distance[2], -(x + 50));
+        RenderMesh2D(meshes[name1 + std::to_string(3)], shaders["VertexColor"], modelMatrix);
+        RenderMesh2D(meshes[name2 + std::to_string(3)], shaders["VertexColor"], modelMatrix);
+
+        if (scaleEnemyX[2] <= 0 && scaleEnemyY[2] <= 0) {
+            translateX[2] = 100;
+            enemyLives[2] = 0;
+            isMoving[2] = false;
+            scaleEnemyX[2] = 1;
+            scaleEnemyY[2] = 1;
+            meshes.erase(name1 + std::to_string(3));
+            meshes.erase(name2 + std::to_string(3));
+            tx[3 * line] = 0;
+            tx[3 * line + 1] = 0;
+            tx[3 * line + 2] = 0;
+            scaleOut[2] = false;
+            scaleIn[2] = false;
+            cout << enemyLives[2] << endl;
+        }
+        modelMatrix = matrix;
+    }
+}
+
 
 Tema1::Tema1()
 {
@@ -121,7 +263,10 @@ void Tema1::Init()
     check = true;
     isPressed = false;
     ty = 0;
-    angularStep = 0;
+    
+    for (int i = 0; i < 9; i++) {
+        angularStep[i] = 0;
+    }
 
     for (int i = 0; i < 9; i++) {
         tx[i] = 0;
@@ -130,9 +275,14 @@ void Tema1::Init()
     glm::vec3 corner = glm::vec3(0, 0, 0);
     float squareSide = 100;
 
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 3; i++) {
         translateX[i] = 100;
         translateY[i] = 0;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        scaleEnemyX[i] = 1;
+        scaleEnemyY[i] = 1;
     }
 
     line = -1;
@@ -172,6 +322,10 @@ void Tema1::Init()
         flag[i] = true;
     }
 
+    for (int i = 0; i < 3; i++) {
+        distance[i] = 0;
+    }
+
     colors[0] = glm::vec3(1, 0.5, 0); // orange
     colors[1] = glm::vec3(0, 0, 1); // blue
     colors[2] = glm::vec3(1, 1, 0); // yellow
@@ -180,10 +334,15 @@ void Tema1::Init()
     counterEnemies = 0;
     counterStars = 0;
     counterProjectiles = 0;
-    randomTime = rand() % 10;
+    randomTime = rand() % 5 + 5;
     randomTimeStars = rand() % 10;
     hexagoneRadius = 50;
     diamondRadius = 40;
+
+    pentagoneLength = 2 * 15 * sin(M_PI / 10);
+    sine = sin(M_PI / 10);
+    l = 15 * sqrt(3 * sine * sine + 2 * sine) / 2;
+    y = sqrt(225 - pentagoneLength * pentagoneLength);
 
     Mesh* square1 = object2D::CreateSquare("square1", glm::vec3(100, 15, 0), squareSide, glm::vec3(0, 1, 0), true);
     AddMeshToList(square1);
@@ -297,6 +456,18 @@ void Tema1::Init()
     for (int i = 0; i < 4; i++) {
         isDragged[i] = false;
     }
+
+    for (int i = 0; i < 3; i++) {
+        enemyLives[i] = 0;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        scaleOut[i] = false;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        scaleIn[i] = false;
+    }
 }
 
 
@@ -374,13 +545,13 @@ void Tema1::Update(float deltaTimeSeconds)
             }
         }
         counterEnemies = 0;
-        randomTime = rand() % 10 + 3;
+        randomTime = rand() % 10 + 1;
     }
 
     // Here I keep translating the hexagon until it reaches the end line
     // When the end line is reached, I decrement the number of lives.
     for (int i = 0; i < 3; i++) {
-        if (isMoving[i]) {
+        if (isMoving[i] && !scaleOut[i] && !scaleIn[i]) {
             modelMatrix = glm::mat3(1);
             translateX[i] -= 100 * deltaTimeSeconds;
 
@@ -395,105 +566,474 @@ void Tema1::Update(float deltaTimeSeconds)
                 meshes.erase("life" + std::to_string(lives_no--));
             }
         }
-    }
-
-    for (int i = 0; i < 9; i++) {
-        modelMatrix = glm::mat3(1);
-        if (!isEmptyCell[i]) {
-            if (line == 0 && enemyColor1 == draggedColor) {
-                projectiles[i] = object2D::CreateStar("projectile" + std::to_string(i + 1), glm::vec3(x_projectile[i], y_projectile[i], 2), 15, draggedColor, true);
-                AddMeshToList(projectiles[i]);
-
-                angularStep += 5 * deltaTimeSeconds;
-                tx[i] += 400 * deltaTimeSeconds;
-                ty = 0;
-
-                modelMatrix *= transform2D::Translate(tx[i], ty);
-                modelMatrix *= transform2D::Translate(x_projectile[i], y_projectile[i] + starCenterDistance);
-                modelMatrix *= transform2D::Rotate(angularStep);
-                modelMatrix *= transform2D::Translate(- x_projectile[i], - y_projectile[i] - starCenterDistance);
-
-                RenderMesh2D(meshes["projectile" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
-
-                if (tx[i] >= 1100) {
-                    tx[i] = 0;
-                    angularStep = 0;
-                }
-
-                float pentagoneLength = 2 * 15 * sin(M_PI / 10);
-                float sine = sin(M_PI / 10);
-                float l = 15 * sqrt(3 * sine * sine + 2 * sine) / 2;
-                float y = sqrt(225 - pentagoneLength * pentagoneLength);
-
-                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[0], 360, l + y, hexagoneRadius)) {
-                    tx[i] == 0;
-                    meshes.erase("projectile" + std::to_string(i + 1));
-                }
-            }
-            else if (line == 1 && enemyColor2 == draggedColor) {
-                projectiles[i] = object2D::CreateStar("projectile" + std::to_string(i + 1), glm::vec3(x_projectile[i], y_projectile[i], 2), 15, draggedColor, true);
-                AddMeshToList(projectiles[i]);
-
-                angularStep += 5 * deltaTimeSeconds;
-                tx[i] += 400 * deltaTimeSeconds;
-                ty = 0;
-
-                modelMatrix *= transform2D::Translate(tx[i], ty);
-                modelMatrix *= transform2D::Translate(x_projectile[i], y_projectile[i] + starCenterDistance);
-                modelMatrix *= transform2D::Rotate(angularStep);
-                modelMatrix *= transform2D::Translate(-x_projectile[i], -y_projectile[i] - starCenterDistance);
-
-                RenderMesh2D(meshes["projectile" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
-
-                if (tx[i] >= 1100) {
-                    tx[i] = 0;
-                    angularStep = 0;
-                }
-
-                float pentagoneLength = 2 * 15 * sin(M_PI / 10);
-                float sine = sin(M_PI / 10);
-                float l = 15 * sqrt(3 * sine * sine + 2 * sine) / 2;
-                float y = sqrt(225 - pentagoneLength * pentagoneLength);
-
-                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[1], 215, l + y, hexagoneRadius)) {
-                    tx[i] == 0;
-                    meshes.erase("projectile" + std::to_string(i + 1));
-                }
-            }
-            else if (line == 2 && enemyColor3 == draggedColor) {
-                projectiles[i] = object2D::CreateStar("projectile" + std::to_string(i + 1), glm::vec3(x_projectile[i], y_projectile[i], 2), 15, draggedColor, true);
-                AddMeshToList(projectiles[i]);
-
-                angularStep += 5 * deltaTimeSeconds;
-                tx[i] += 400 * deltaTimeSeconds;
-                ty = 0;
-
-                modelMatrix *= transform2D::Translate(tx[i], ty);
-                modelMatrix *= transform2D::Translate(x_projectile[i], y_projectile[i] + starCenterDistance);
-                modelMatrix *= transform2D::Rotate(angularStep);
-                modelMatrix *= transform2D::Translate(-x_projectile[i], -y_projectile[i] - starCenterDistance);
-
-                RenderMesh2D(meshes["projectile" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
-
-                if (tx[i] >= 1100) {
-                    tx[i] = 0;
-                    angularStep = 0;
-                }
-
-                float pentagoneLength = 2 * 15 * sin(M_PI / 10);
-                float sine = sin(M_PI / 10);
-                float l = 15 * sqrt(3 * sine * sine + 2 * sine) / 2;
-                float y = sqrt(225 - pentagoneLength * pentagoneLength);
-
-                if (CheckCollision(x_projectile[i] + tx[i], y_projectile[i] + starCenterDistance, 1200 + translateX[2], 70, l + y, hexagoneRadius)) {
-                    tx[i] == 0;
-                    meshes.erase("projectile" + std::to_string(i + 1));
-                }
-            }
+        else if (isMoving[i] && scaleOut[i] && scaleIn[i]) {
+            modelMatrix = glm::mat3(1);
+            modelMatrix *= transform2D::Translate(translateX[i], translateY[i]);
+            RenderMesh2D(meshes["enemyOut" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
+            RenderMesh2D(meshes["enemyIn" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
         }
     }
 
+    counterProjectiles += deltaTimeSeconds;
 
+    /*
+        Launching stars and checking for collision between them and the hexagons
+    */
+    if (((isMoving[0] && map[0] == 0) ||
+        (isMoving[1] && map[1] == 0) ||
+        (isMoving[2] && map[2] == 0)) &&
+        !isEmptyCell[0] &&
+        CheckColor(cellColor[0], enemyColor1, enemyColor2,  enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[0] = object2D::CreateStar("projectile1", glm::vec3(x_projectile[0], y_projectile[0], 2), 15, cellColor[0], true);
+        AddMeshToList(projectiles[0]);
+
+        angularStep[0] += 2 * deltaTimeSeconds;
+        tx[0] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[0], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[0], y_projectile[0] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[0]);
+        modelMatrix *= transform2D::Translate(-x_projectile[0], -y_projectile[0] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile1"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[0] >= 1100) {
+            tx[0] = 0;
+            angularStep[0] = 0;
+        }
+
+        if ((map[0] == 0 && CheckCollision(x_projectile[0] + tx[0], y_projectile[0] + starCenterDistance, 1200 + translateX[0], 360, l + y, hexagoneRadius)) ||
+            (map[1] == 0 && CheckCollision(x_projectile[0] + tx[0], y_projectile[0] + starCenterDistance, 1200 + translateX[1], 360, l + y, hexagoneRadius)) ||
+            (map[2] == 0 && CheckCollision(x_projectile[0] + tx[0], y_projectile[0] + starCenterDistance, 1200 + translateX[2], 360, l + y, hexagoneRadius))) {
+            tx[0] = 0;
+            meshes.erase("projectile1");
+            if (map[0] == 0) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 0) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 0) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 0, 310, enemyColor1, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+    if (((isMoving[0] && map[0] == 0) ||
+        (isMoving[1] && map[1] == 0) ||
+        (isMoving[2] && map[2] == 0)) &&
+        !isEmptyCell[1] &&
+        CheckColor(cellColor[1], enemyColor1, enemyColor2, enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[1] = object2D::CreateStar("projectile2", glm::vec3(x_projectile[1], y_projectile[1], 2), 15, cellColor[1], true);
+        AddMeshToList(projectiles[1]);
+
+        angularStep[1] += 2 * deltaTimeSeconds;
+        tx[1] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[1], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[1], y_projectile[1] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[1]);
+        modelMatrix *= transform2D::Translate(-x_projectile[1], -y_projectile[1] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile2"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[1] >= 1100) {
+            tx[1] = 0;
+            angularStep[1] = 0;
+        }
+
+        if ((map[0] == 0 && CheckCollision(x_projectile[1] + tx[1], y_projectile[1] + starCenterDistance, 1200 + translateX[0], 360, l + y, hexagoneRadius)) ||
+            (map[1] == 0 && CheckCollision(x_projectile[1] + tx[1], y_projectile[1] + starCenterDistance, 1200 + translateX[1], 360, l + y, hexagoneRadius)) ||
+            (map[2] == 0 && CheckCollision(x_projectile[1] + tx[1], y_projectile[1] + starCenterDistance, 1200 + translateX[2], 360, l + y, hexagoneRadius))) {
+            tx[1] = 0;
+            meshes.erase("projectile2");
+            if (map[0] == 0) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 0) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 0) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 0, 310, enemyColor1, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+    if (((isMoving[0] && map[0] == 0) ||
+        (isMoving[1] && map[1] == 0) ||
+        (isMoving[2] && map[2] == 0)) &&
+        !isEmptyCell[2] &&
+        CheckColor(cellColor[2], enemyColor1, enemyColor2, enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[2] = object2D::CreateStar("projectile3", glm::vec3(x_projectile[2], y_projectile[2], 2), 15, cellColor[2], true);
+        AddMeshToList(projectiles[2]);
+
+        angularStep[2] += 2 * deltaTimeSeconds;
+        tx[2] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[2], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[2], y_projectile[2] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[2]);
+        modelMatrix *= transform2D::Translate(-x_projectile[2], -y_projectile[2] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile3"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[2] >= 1100) {
+            tx[2] = 0;
+            angularStep[2] = 0;
+        }
+
+        if ((map[0] == 0 && CheckCollision(x_projectile[2] + tx[2], y_projectile[2] + starCenterDistance, 1200 + translateX[0], 360, l + y, hexagoneRadius)) ||
+            (map[1] == 0 && CheckCollision(x_projectile[2] + tx[2], y_projectile[2] + starCenterDistance, 1200 + translateX[1], 360, l + y, hexagoneRadius)) ||
+            (map[2] == 0 && CheckCollision(x_projectile[2] + tx[2], y_projectile[2] + starCenterDistance, 1200 + translateX[2], 360, l + y, hexagoneRadius))) {
+            tx[2] = 0;
+            meshes.erase("projectile3");
+            if (map[0] == 0) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 0) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 0) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 0, 310, enemyColor1, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+    if (((isMoving[0] && map[0] == 1) ||
+        (isMoving[1] && map[1] == 1) ||
+        (isMoving[2] && map[2] == 1)) &&
+        !isEmptyCell[3] &&
+        CheckColor(cellColor[3], enemyColor1, enemyColor2, enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[3] = object2D::CreateStar("projectile4", glm::vec3(x_projectile[3], y_projectile[3], 2), 15, cellColor[3], true);
+        AddMeshToList(projectiles[3]);
+
+        angularStep[3] += 2 * deltaTimeSeconds;
+        tx[3] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[3], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[3], y_projectile[3] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[3]);
+        modelMatrix *= transform2D::Translate(-x_projectile[3], -y_projectile[3] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile4"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[3] >= 1100) {
+            tx[3] = 0;
+            angularStep[3] = 0;
+        }
+
+        if ((map[0] == 1 && CheckCollision(x_projectile[3] + tx[3], y_projectile[3] + starCenterDistance, 1200 + translateX[0], 215, l + y, hexagoneRadius)) ||
+            (map[1] == 1 && CheckCollision(x_projectile[3] + tx[3], y_projectile[3] + starCenterDistance, 1200 + translateX[1], 215, l + y, hexagoneRadius)) ||
+            (map[2] == 1 && CheckCollision(x_projectile[3] + tx[3], y_projectile[3] + starCenterDistance, 1200 + translateX[2], 215, l + y, hexagoneRadius))) {
+            tx[3] = 0;
+            meshes.erase("projectile4");
+            if (map[0] == 1) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 1) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 1) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 1, 165, enemyColor2, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+    if (((isMoving[0] && map[0] == 1) ||
+        (isMoving[1] && map[1] == 1) ||
+        (isMoving[2] && map[2] == 1)) &&
+        !isEmptyCell[4] &&
+        CheckColor(cellColor[4], enemyColor1, enemyColor2, enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[4] = object2D::CreateStar("projectile5", glm::vec3(x_projectile[4], y_projectile[4], 2), 15, cellColor[4], true);
+        AddMeshToList(projectiles[4]);
+
+        angularStep[4] += 2 * deltaTimeSeconds;
+        tx[4] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[4], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[4], y_projectile[4] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[4]);
+        modelMatrix *= transform2D::Translate(-x_projectile[4], -y_projectile[4] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile5"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[4] >= 1100) {
+            tx[4] = 0;
+            angularStep[4] = 0;
+        }
+
+        if ((map[0] == 1 && CheckCollision(x_projectile[4] + tx[4], y_projectile[4] + starCenterDistance, 1200 + translateX[0], 215, l + y, hexagoneRadius)) ||
+            (map[1] == 1 && CheckCollision(x_projectile[4] + tx[4], y_projectile[4] + starCenterDistance, 1200 + translateX[1], 215, l + y, hexagoneRadius)) ||
+            (map[2] == 1 && CheckCollision(x_projectile[4] + tx[4], y_projectile[4] + starCenterDistance, 1200 + translateX[2], 215, l + y, hexagoneRadius))) {
+            tx[4] = 0;
+            meshes.erase("projectile5");
+            if (map[0] == 1) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 1) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 1) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 1, 165, enemyColor2, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+    if (((isMoving[0] && map[0] == 1) ||
+        (isMoving[1] && map[1] == 1) ||
+        (isMoving[2] && map[2] == 1)) &&
+        !isEmptyCell[5] &&
+        CheckColor(cellColor[5], enemyColor1, enemyColor2, enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[5] = object2D::CreateStar("projectile6", glm::vec3(x_projectile[5], y_projectile[5], 2), 15, cellColor[5], true);
+        AddMeshToList(projectiles[5]);
+
+        angularStep[5] += 2 * deltaTimeSeconds;
+        tx[5] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[5], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[5], y_projectile[5] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[5]);
+        modelMatrix *= transform2D::Translate(-x_projectile[5], -y_projectile[5] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile6"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[5] >= 1100) {
+            tx[5] = 0;
+            angularStep[5] = 0;
+        }
+
+        if ((map[0] == 1 && CheckCollision(x_projectile[5] + tx[5], y_projectile[5] + starCenterDistance, 1200 + translateX[0], 215, l + y, hexagoneRadius)) ||
+            (map[1] == 1 && CheckCollision(x_projectile[5] + tx[5], y_projectile[5] + starCenterDistance, 1200 + translateX[1], 215, l + y, hexagoneRadius)) ||
+            (map[2] == 1 && CheckCollision(x_projectile[5] + tx[5], y_projectile[5] + starCenterDistance, 1200 + translateX[2], 215, l + y, hexagoneRadius))) {
+            tx[5] = 0;
+            meshes.erase("projectile6");
+            if (map[0] == 1) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 1) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 1) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 1, 165, enemyColor2, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+    if (((isMoving[0] && map[0] == 2) ||
+        (isMoving[1] && map[1] == 2) ||
+        (isMoving[2] && map[2] == 2)) &&
+        !isEmptyCell[6] &&
+        CheckColor(cellColor[6], enemyColor1, enemyColor2, enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[6] = object2D::CreateStar("projectile7", glm::vec3(x_projectile[6], y_projectile[6], 2), 15, cellColor[6], true);
+        AddMeshToList(projectiles[6]);
+
+        angularStep[6] += 2 * deltaTimeSeconds;
+        tx[6] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[6], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[6], y_projectile[6] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[6]);
+        modelMatrix *= transform2D::Translate(-x_projectile[6], -y_projectile[6] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile7"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[6] >= 1100) {
+            tx[6] = 0;
+            angularStep[6] = 0;
+        }
+
+        if ((map[0] == 2 && CheckCollision(x_projectile[6] + tx[6], y_projectile[6] + starCenterDistance, 1200 + translateX[0], 70, l + y, hexagoneRadius)) ||
+            (map[1] == 2 && CheckCollision(x_projectile[6] + tx[6], y_projectile[6] + starCenterDistance, 1200 + translateX[1], 70, l + y, hexagoneRadius)) ||
+            (map[2] == 2 && CheckCollision(x_projectile[6] + tx[6], y_projectile[6] + starCenterDistance, 1200 + translateX[2], 70, l + y, hexagoneRadius))) {
+            tx[6] = 0;
+            meshes.erase("projectile7");
+            if (map[0] == 2) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 2) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 2) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 2, 20, enemyColor3, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+    if (((isMoving[0] && map[0] == 2) ||
+        (isMoving[1] && map[1] == 2) ||
+        (isMoving[2] && map[2] == 2)) &&
+        !isEmptyCell[7] &&
+        CheckColor(cellColor[7], enemyColor1, enemyColor2, enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[7] = object2D::CreateStar("projectile8", glm::vec3(x_projectile[7], y_projectile[7], 2), 15, cellColor[7], true);
+        AddMeshToList(projectiles[7]);
+
+        angularStep[7] += 2 * deltaTimeSeconds;
+        tx[7] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[7], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[7], y_projectile[7] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[7]);
+        modelMatrix *= transform2D::Translate(-x_projectile[7], -y_projectile[7] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile8"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[7] >= 1100) {
+            tx[7] = 0;
+            angularStep[7] = 0;
+        }
+
+        if ((map[0] == 2 && CheckCollision(x_projectile[7] + tx[7], y_projectile[7] + starCenterDistance, 1200 + translateX[0], 70, l + y, hexagoneRadius)) ||
+            (map[1] == 2 && CheckCollision(x_projectile[7] + tx[7], y_projectile[7] + starCenterDistance, 1200 + translateX[1], 70, l + y, hexagoneRadius)) ||
+            (map[2] == 2 && CheckCollision(x_projectile[7] + tx[7], y_projectile[7] + starCenterDistance, 1200 + translateX[2], 70, l + y, hexagoneRadius))) {
+            tx[7] = 0;
+            meshes.erase("projectile8");
+            if (map[0] == 2) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 2) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 2) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 2, 20, enemyColor3, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+    if (((isMoving[0] && map[0] == 2) ||
+        (isMoving[1] && map[1] == 2) ||
+        (isMoving[2] && map[2] == 2)) &&
+        !isEmptyCell[8] &&
+        CheckColor(cellColor[8], enemyColor1, enemyColor2, enemyColor3)) {
+        modelMatrix = glm::mat3(1);
+
+        projectiles[8] = object2D::CreateStar("projectile9", glm::vec3(x_projectile[8], y_projectile[8], 2), 15, cellColor[8], true);
+        AddMeshToList(projectiles[8]);
+
+        angularStep[8] += 2 * deltaTimeSeconds;
+        tx[8] += 400 * deltaTimeSeconds;
+        ty = 0;
+
+        modelMatrix *= transform2D::Translate(tx[8], ty);
+        modelMatrix *= transform2D::Translate(x_projectile[8], y_projectile[8] + starCenterDistance);
+        modelMatrix *= transform2D::Rotate(angularStep[8]);
+        modelMatrix *= transform2D::Translate(-x_projectile[8], -y_projectile[8] - starCenterDistance);
+
+        RenderMesh2D(meshes["projectile9"], shaders["VertexColor"], modelMatrix);
+
+        if (tx[8] >= 1100) {
+            tx[8] = 0;
+            angularStep[8] = 0;
+        }
+
+        if ((map[0] == 2 && CheckCollision(x_projectile[8] + tx[8], y_projectile[8] + starCenterDistance, 1200 + translateX[0], 70, l + y, hexagoneRadius)) ||
+            (map[1] == 2 && CheckCollision(x_projectile[8] + tx[8], y_projectile[8] + starCenterDistance, 1200 + translateX[1], 70, l + y, hexagoneRadius)) ||
+            (map[2] == 2 && CheckCollision(x_projectile[8] + tx[8], y_projectile[8] + starCenterDistance, 1200 + translateX[2], 70, l + y, hexagoneRadius))) {
+            tx[8] = 0;
+            meshes.erase("projectile9");
+            if (map[0] == 2) {
+                distance[0] = 1200 + translateX[0];
+                enemyLives[0]++;
+            }
+            if (map[1] == 2) {
+                distance[1] = 1200 + translateX[1];
+                enemyLives[1]++;
+            }
+            if (map[2] == 2) {
+                distance[2] = 1200 + translateX[2];
+                enemyLives[2]++;
+            }
+        }
+
+        modelMatrix = glm::mat3(1);
+
+        KillEnemy("enemyOut", "enemyIn", deltaTimeSeconds, 2, 20, enemyColor3, enemyLives, map,
+            translateX, tx, scaleEnemyX, scaleEnemyY, isMoving, modelMatrix, meshes, shaders);
+    }
+
+
+    /*
+        Checking for collision between the diamonds and the hexagons.
+    */
     if ((CheckCollision(150, 355, 1200 + translateX[0], 360, diamondRadius, hexagoneRadius) && map[0] == 0)
         || (CheckCollision(150, 355, 1200 + translateX[1], 360, diamondRadius, hexagoneRadius) && map[1] == 0)
         || (CheckCollision(150, 355, 1200 + translateX[2], 360, diamondRadius, hexagoneRadius) && map[2] == 0)
@@ -718,12 +1258,14 @@ void Tema1::Update(float deltaTimeSeconds)
         RenderMesh2D(meshes["resource" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
     }
 
+    // This is for displaying the touretes.
     for (int i = 0; i < 9; i++) {
         modelMatrix = glm::mat3(1);
         DisplayDiamond("diamond" + std::to_string(i + 1), checkButtonPressRight[i], checkScale[i], scaleX[i],
             scaleY[i], deltaTimeSeconds, centers[0][i], centers[1][i], modelMatrix, meshes, shaders);
     }
 
+    // This is for drag and drop.
     for (int i = 0; i < 4; i++) {
         if (isDragged[i]) {
             modelMatrix = glm::mat3(1);
@@ -965,6 +1507,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
                 if (y1 == 305) {
                     for (int j = 0; j < 4; j++) {
                         if (draggedColor == colors[j] && inventory.size() >= boxes[j].stars_no) {
+                            cellColor[i] = draggedColor;
                             int cnt = boxes[j].stars_no;
                             while (cnt > 0) {
                                 inventory.pop();
@@ -973,7 +1516,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
                                 x_inventory -= 40;
                             }
                             diamond = object2D::CreateDiamond("diamond" + std::to_string(i + 1), glm::vec3((x1 + x2) / 2, y1 + 5, 1),
-                                90, 40, 20, 0.8f, draggedColor, true);
+                                90, 40, 20, 0.8f, cellColor[i], true);
                             AddMeshToList(diamond);
                             isEmptyCell[i] = false;
                             break;
@@ -983,6 +1526,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
                 else if (y1 == 160) {
                     for (int j = 0; j < 4; j++) {
                         if (draggedColor == colors[j] && inventory.size() >= boxes[j].stars_no) {
+                            cellColor[i] = draggedColor;
                             int cnt = boxes[j].stars_no;
                             while (cnt > 0) {
                                 inventory.pop();
@@ -991,7 +1535,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
                                 x_inventory -= 40;
                             }
                             diamond = object2D::CreateDiamond("diamond" + std::to_string(i + 1), glm::vec3((x1 + x2) / 2, y1 + 5, 1),
-                                90, 40, 20, 0.8f, draggedColor, true);
+                                90, 40, 20, 0.8f, cellColor[i], true);
                             AddMeshToList(diamond);
                             isEmptyCell[i] = false;
                             break;
@@ -1001,6 +1545,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
                 else if (y1 == 15) {
                     for (int j = 0; j < 4; j++) {
                         if (draggedColor == colors[j] && inventory.size() >= boxes[j].stars_no) {
+                            cellColor[i] = draggedColor;
                             int cnt = boxes[j].stars_no;
                             while (cnt > 0) {
                                 inventory.pop();
@@ -1009,7 +1554,7 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
                                 x_inventory -= 40;
                             }
                             diamond = object2D::CreateDiamond("diamond" + std::to_string(i + 1), glm::vec3((x1 + x2) / 2, y1 + 5, 1),
-                                90, 40, 20, 0.8f, draggedColor, true);
+                                90, 40, 20, 0.8f, cellColor[i], true);
                             AddMeshToList(diamond);
                             isEmptyCell[i] = false;
                             break;

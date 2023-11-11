@@ -49,6 +49,22 @@ namespace m1
             glm::mat3 matrix,
             std::unordered_map<std::string, Mesh*>& meshes,
             std::unordered_map<std::string, Shader*> shaders);
+        void KillEnemy(const std::string name1,
+            const std::string name2,
+            float time,
+            int line,
+            float x,
+            glm::vec3 color,
+            int* enemyLives,
+            std::unordered_map<int, int> map,
+            float* translateX,
+            float* tx,
+            float* scaleEnemyX,
+            float* scaleEnemyY,
+            bool* isMoving,
+            glm::mat3& modelMatrix,
+            std::unordered_map<std::string, Mesh*>& meshes,
+            std::unordered_map<std::string, Shader*> shaders);
 
     protected:
         float cx, cy;
@@ -56,6 +72,9 @@ namespace m1
 
         float scaleX[9];
         float scaleY[9];
+        float scaleEnemy[3];
+        float scaleEnemyX[3];
+        float scaleEnemyY[3];
 
         float translateX[9];
         float translateY[9];
@@ -65,7 +84,7 @@ namespace m1
         bool checkScale[9];
         bool checkButtonPressRight[9];
 
-        float angularStep;
+        float angularStep[9];
 
         // TODO(student): If you need any other class variables, define them here.
         Mesh* diamond;
@@ -88,6 +107,7 @@ namespace m1
         float counterProjectiles;
         int randomTime;
         int randomTimeStars;
+        int randomTimeProjectiles;
 
         float sx;
         float sy;
@@ -137,5 +157,17 @@ namespace m1
         int index;
 
         std::unordered_map<int, int> map;
+
+        int enemyLives[3];
+        float distance[3];
+        bool scaleOut[3];
+        bool scaleIn[3];
+
+        float pentagoneLength;
+        float sine;
+        float l;
+        float y;
+
+        glm::vec3 cellColor[9];
     };
 }   // namespace m1
