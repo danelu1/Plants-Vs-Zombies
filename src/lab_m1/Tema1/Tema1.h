@@ -2,6 +2,7 @@
 
 #include "components/simple_scene.h"
 #include <stack>
+#include <queue>
 
 
 namespace m1
@@ -169,5 +170,6 @@ namespace m1
         float y;
 
         glm::vec3 cellColor[9];
+        std::queue<glm::vec3> lineColors[3];
     };
 }   // namespace m1

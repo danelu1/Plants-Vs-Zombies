@@ -14,8 +14,16 @@ using namespace m1;
  *  To find out more about `FrameStart`, `Update`, `FrameEnd`
  *  and the order in which they are called, see `world.cpp`.
  */
-bool CheckColor(glm::vec3 color, glm::vec3 color1, glm::vec3 color2, glm::vec3 color3) {
-    return (color == color1) || (color == color2) || (color == color3);
+bool contains(std::queue<glm::vec3> colors[], glm::vec3 color, int line) {
+    std::queue<glm::vec3> q = colors[line];
+    while (!q.empty()) {
+        if (q.front() == color) {
+            return true;
+        }
+        q.pop();
+    }
+
+    return false;
 }
 
 bool CheckCollision(float x1, float y1, float x2, float y2, float radius1, float radius2) {
@@ -116,7 +124,6 @@ void Tema1::KillEnemy(const std::string name1,
     std::unordered_map<std::string, Shader*> shaders)
 {
     if (enemyLives[0] >= 3 && map[0] == line) {
-        enemyLives[0] = 3;
         glm::mat3 matrix = modelMatrix;
 
         scaleOut[0] = true;
@@ -139,6 +146,9 @@ void Tema1::KillEnemy(const std::string name1,
         RenderMesh2D(meshes[name2 + std::to_string(1)], shaders["VertexColor"], modelMatrix);
 
         if (scaleEnemyX[0] <= 0 && scaleEnemyY[0] <= 0) {
+            if (!lineColors[line].empty()) {
+                lineColors[line].pop();
+            }
             translateX[0] = 100;
             enemyLives[0] = 0;
             isMoving[0] = false;
@@ -156,7 +166,6 @@ void Tema1::KillEnemy(const std::string name1,
         modelMatrix = matrix;
     }
     if (enemyLives[1] >= 3 && map[1] == line) {
-        enemyLives[1] = 3;
         glm::mat3 matrix = modelMatrix;
 
         scaleOut[1] = true;
@@ -179,6 +188,9 @@ void Tema1::KillEnemy(const std::string name1,
         RenderMesh2D(meshes[name2 + std::to_string(2)], shaders["VertexColor"], modelMatrix);
 
         if (scaleEnemyX[1] <= 0 && scaleEnemyY[1] <= 0) {
+            if (!lineColors[line].empty()) {
+                lineColors[line].pop();
+            }
             translateX[1] = 100;
             enemyLives[1] = 0;
             isMoving[1] = false;
@@ -196,7 +208,6 @@ void Tema1::KillEnemy(const std::string name1,
         modelMatrix = matrix;
     }
     if (enemyLives[2] >= 3 && map[2] == line) {
-        enemyLives[2] = 3;
         glm::mat3 matrix = modelMatrix;
 
         scaleOut[2] = true;
@@ -219,6 +230,9 @@ void Tema1::KillEnemy(const std::string name1,
         RenderMesh2D(meshes[name2 + std::to_string(3)], shaders["VertexColor"], modelMatrix);
 
         if (scaleEnemyX[2] <= 0 && scaleEnemyY[2] <= 0) {
+            if (!lineColors[line].empty()) {
+                lineColors[line].pop();
+            }
             translateX[2] = 100;
             enemyLives[2] = 0;
             isMoving[2] = false;
@@ -528,16 +542,22 @@ void Tema1::Update(float deltaTimeSeconds)
                 if (line == 0) {
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 310, 1),
                         glm::vec3(1200, 320, 2), line, color, enemyColor1, modelMatrix, meshes, shaders);
+                    lineColors[0].push(enemyColor1);
+                    cout << "Enemy spawned " << i << endl;
                     map[i] = line;
                 }
                 else if (line == 1) {
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 165, 1),
                         glm::vec3(1200, 175, 2), line, color, enemyColor2, modelMatrix, meshes, shaders);
+                    lineColors[1].push(enemyColor2);
+                    cout << "Enemy spawned " << i << endl;;
                     map[i] = line;
                 }
                 else if (line == 2) {
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 20, 1),
                         glm::vec3(1200, 30, 2), line, color, enemyColor3, modelMatrix, meshes, shaders);
+                    lineColors[2].push(enemyColor3);
+                    cout << "Enemy spawned " << i << endl;
                     map[i] = line;
                 }
 
@@ -561,6 +581,15 @@ void Tema1::Update(float deltaTimeSeconds)
             RenderMesh2D(meshes["enemyIn" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
 
             if (translateX[i] <= -1150) {
+                if (map[i] == 0) {
+                    lineColors[0].pop();
+                }
+                else if (map[i] == 1) {
+                    lineColors[1].pop();
+                }
+                else if (map[i] == 2) {
+                    lineColors[2].pop();
+                }
                 translateX[i] = 100;
                 isMoving[i] = false;
                 meshes.erase("life" + std::to_string(lives_no--));
@@ -582,12 +611,15 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 0) ||
         (isMoving[1] && map[1] == 0) ||
         (isMoving[2] && map[2] == 0)) &&
-        !isEmptyCell[0] &&
-        CheckColor(cellColor[0], enemyColor1, enemyColor2,  enemyColor3)) {
+        !isEmptyCell[0] && contains(lineColors, cellColor[0], 0)) {
         modelMatrix = glm::mat3(1);
 
-        projectiles[0] = object2D::CreateStar("projectile1", glm::vec3(x_projectile[0], y_projectile[0], 2), 15, cellColor[0], true);
-        AddMeshToList(projectiles[0]);
+        if (counterProjectiles > 2) {
+            meshes.erase("projectile1");
+            projectiles[0] = object2D::CreateStar("projectile1", glm::vec3(x_projectile[0], y_projectile[0], 2), 15, cellColor[0], true);
+            AddMeshToList(projectiles[0]);
+            counterProjectiles = 0;
+        }
 
         angularStep[0] += 2 * deltaTimeSeconds;
         tx[0] += 400 * deltaTimeSeconds;
@@ -632,8 +664,7 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 0) ||
         (isMoving[1] && map[1] == 0) ||
         (isMoving[2] && map[2] == 0)) &&
-        !isEmptyCell[1] &&
-        CheckColor(cellColor[1], enemyColor1, enemyColor2, enemyColor3)) {
+        !isEmptyCell[1] && contains(lineColors, cellColor[1], 0)) {
         modelMatrix = glm::mat3(1);
 
         projectiles[1] = object2D::CreateStar("projectile2", glm::vec3(x_projectile[1], y_projectile[1], 2), 15, cellColor[1], true);
@@ -682,8 +713,7 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 0) ||
         (isMoving[1] && map[1] == 0) ||
         (isMoving[2] && map[2] == 0)) &&
-        !isEmptyCell[2] &&
-        CheckColor(cellColor[2], enemyColor1, enemyColor2, enemyColor3)) {
+        !isEmptyCell[2] && contains(lineColors, cellColor[2], 0)) {
         modelMatrix = glm::mat3(1);
 
         projectiles[2] = object2D::CreateStar("projectile3", glm::vec3(x_projectile[2], y_projectile[2], 2), 15, cellColor[2], true);
@@ -732,8 +762,7 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 1) ||
         (isMoving[1] && map[1] == 1) ||
         (isMoving[2] && map[2] == 1)) &&
-        !isEmptyCell[3] &&
-        CheckColor(cellColor[3], enemyColor1, enemyColor2, enemyColor3)) {
+        !isEmptyCell[3] && contains(lineColors, cellColor[3], 1)) {
         modelMatrix = glm::mat3(1);
 
         projectiles[3] = object2D::CreateStar("projectile4", glm::vec3(x_projectile[3], y_projectile[3], 2), 15, cellColor[3], true);
@@ -782,8 +811,7 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 1) ||
         (isMoving[1] && map[1] == 1) ||
         (isMoving[2] && map[2] == 1)) &&
-        !isEmptyCell[4] &&
-        CheckColor(cellColor[4], enemyColor1, enemyColor2, enemyColor3)) {
+        !isEmptyCell[4] && contains(lineColors, cellColor[4], 1)) {
         modelMatrix = glm::mat3(1);
 
         projectiles[4] = object2D::CreateStar("projectile5", glm::vec3(x_projectile[4], y_projectile[4], 2), 15, cellColor[4], true);
@@ -832,8 +860,7 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 1) ||
         (isMoving[1] && map[1] == 1) ||
         (isMoving[2] && map[2] == 1)) &&
-        !isEmptyCell[5] &&
-        CheckColor(cellColor[5], enemyColor1, enemyColor2, enemyColor3)) {
+        !isEmptyCell[5] && contains(lineColors, cellColor[5], 1)) {
         modelMatrix = glm::mat3(1);
 
         projectiles[5] = object2D::CreateStar("projectile6", glm::vec3(x_projectile[5], y_projectile[5], 2), 15, cellColor[5], true);
@@ -882,8 +909,7 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 2) ||
         (isMoving[1] && map[1] == 2) ||
         (isMoving[2] && map[2] == 2)) &&
-        !isEmptyCell[6] &&
-        CheckColor(cellColor[6], enemyColor1, enemyColor2, enemyColor3)) {
+        !isEmptyCell[6] && contains(lineColors, cellColor[6], 2)) {
         modelMatrix = glm::mat3(1);
 
         projectiles[6] = object2D::CreateStar("projectile7", glm::vec3(x_projectile[6], y_projectile[6], 2), 15, cellColor[6], true);
@@ -932,8 +958,7 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 2) ||
         (isMoving[1] && map[1] == 2) ||
         (isMoving[2] && map[2] == 2)) &&
-        !isEmptyCell[7] &&
-        CheckColor(cellColor[7], enemyColor1, enemyColor2, enemyColor3)) {
+        !isEmptyCell[7] && contains(lineColors, cellColor[7], 2)) {
         modelMatrix = glm::mat3(1);
 
         projectiles[7] = object2D::CreateStar("projectile8", glm::vec3(x_projectile[7], y_projectile[7], 2), 15, cellColor[7], true);
@@ -982,8 +1007,7 @@ void Tema1::Update(float deltaTimeSeconds)
     if (((isMoving[0] && map[0] == 2) ||
         (isMoving[1] && map[1] == 2) ||
         (isMoving[2] && map[2] == 2)) &&
-        !isEmptyCell[8] &&
-        CheckColor(cellColor[8], enemyColor1, enemyColor2, enemyColor3)) {
+        !isEmptyCell[8] && contains(lineColors, cellColor[8], 2)) {
         modelMatrix = glm::mat3(1);
 
         projectiles[8] = object2D::CreateStar("projectile9", glm::vec3(x_projectile[8], y_projectile[8], 2), 15, cellColor[8], true);
