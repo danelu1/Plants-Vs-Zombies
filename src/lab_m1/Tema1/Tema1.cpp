@@ -161,7 +161,6 @@ void Tema1::KillEnemy(const std::string name1,
             tx[3 * line + 2] = 0;
             scaleOut[0] = false;
             scaleIn[0] = false;
-            cout << enemyLives[0] << endl;
         }
         modelMatrix = matrix;
     }
@@ -203,7 +202,6 @@ void Tema1::KillEnemy(const std::string name1,
             tx[3 * line + 2] = 0;
             scaleOut[1] = false;
             scaleIn[1] = false;
-            cout << enemyLives[1] << endl;
         }
         modelMatrix = matrix;
     }
@@ -245,7 +243,6 @@ void Tema1::KillEnemy(const std::string name1,
             tx[3 * line + 2] = 0;
             scaleOut[2] = false;
             scaleIn[2] = false;
-            cout << enemyLives[2] << endl;
         }
         modelMatrix = matrix;
     }
@@ -543,23 +540,22 @@ void Tema1::Update(float deltaTimeSeconds)
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 310, 1),
                         glm::vec3(1200, 320, 2), line, color, enemyColor1, modelMatrix, meshes, shaders);
                     lineColors[0].push(enemyColor1);
-                    cout << "Enemy spawned " << i << endl;
                     map[i] = line;
                 }
                 else if (line == 1) {
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 165, 1),
                         glm::vec3(1200, 175, 2), line, color, enemyColor2, modelMatrix, meshes, shaders);
                     lineColors[1].push(enemyColor2);
-                    cout << "Enemy spawned " << i << endl;;
                     map[i] = line;
                 }
                 else if (line == 2) {
                     CreateNewEnemy("enemyOut" + std::to_string(i + 1), "enemyIn" + std::to_string(i + 1), enemies, glm::vec3(1200, 20, 1),
                         glm::vec3(1200, 30, 2), line, color, enemyColor3, modelMatrix, meshes, shaders);
                     lineColors[2].push(enemyColor3);
-                    cout << "Enemy spawned " << i << endl;
                     map[i] = line;
                 }
+
+                modelMatrix = glm::mat3(1);
 
                 break;
             }
@@ -582,24 +578,24 @@ void Tema1::Update(float deltaTimeSeconds)
 
             if (translateX[i] <= -1150) {
                 if (map[i] == 0) {
-                    lineColors[0].pop();
+                    if (!lineColors[0].empty()) {
+                        lineColors[0].pop();
+                    }
                 }
                 else if (map[i] == 1) {
-                    lineColors[1].pop();
+                    if (!lineColors[1].empty()) {
+                        lineColors[1].pop();
+                    }
                 }
                 else if (map[i] == 2) {
-                    lineColors[2].pop();
+                    if (!lineColors[2].empty()) {
+                        lineColors[2].pop();
+                    }
                 }
                 translateX[i] = 100;
                 isMoving[i] = false;
                 meshes.erase("life" + std::to_string(lives_no--));
             }
-        }
-        else if (isMoving[i] && scaleOut[i] && scaleIn[i]) {
-            modelMatrix = glm::mat3(1);
-            modelMatrix *= transform2D::Translate(translateX[i], translateY[i]);
-            RenderMesh2D(meshes["enemyOut" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
-            RenderMesh2D(meshes["enemyIn" + std::to_string(i + 1)], shaders["VertexColor"], modelMatrix);
         }
     }
 
@@ -614,12 +610,8 @@ void Tema1::Update(float deltaTimeSeconds)
         !isEmptyCell[0] && contains(lineColors, cellColor[0], 0)) {
         modelMatrix = glm::mat3(1);
 
-        if (counterProjectiles > 2) {
-            meshes.erase("projectile1");
-            projectiles[0] = object2D::CreateStar("projectile1", glm::vec3(x_projectile[0], y_projectile[0], 2), 15, cellColor[0], true);
-            AddMeshToList(projectiles[0]);
-            counterProjectiles = 0;
-        }
+        projectiles[0] = object2D::CreateStar("projectile1", glm::vec3(x_projectile[0], y_projectile[0], 2), 15, cellColor[0], true);
+        AddMeshToList(projectiles[0]);
 
         angularStep[0] += 2 * deltaTimeSeconds;
         tx[0] += 400 * deltaTimeSeconds;
