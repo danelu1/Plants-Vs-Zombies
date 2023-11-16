@@ -13,6 +13,25 @@ namespace m1
         Tema1();
         ~Tema1();
 
+        typedef struct enemy {
+            Mesh* inner;
+            Mesh* outer;
+            glm::vec3 innerColor;
+            glm::vec3 outerColor;
+            std::string innerName;
+            std::string outerName;
+            bool isMoving;
+            bool isScaling;
+            float scaleX;
+            float scaleY;
+            float translateX;
+            int lives;
+            int line;
+            int index;
+            bool checkScale;
+            float centerY;
+        } enemy;
+
         void Init() override;
 
     private:
@@ -39,17 +58,6 @@ namespace m1
             glm::mat3& matrix,
             std::unordered_map<std::string, Mesh*> meshes,
             std::unordered_map<std::string, Shader*> shaders);
-        void CreateNewEnemy(const std::string name1,
-            const std::string name2,
-            Mesh* enemies[],
-            glm::vec3 position1,
-            glm::vec3 position2,
-            int index,
-            int& color,
-            glm::vec3& enemyColor,
-            glm::mat3 matrix,
-            std::unordered_map<std::string, Mesh*>& meshes,
-            std::unordered_map<std::string, Shader*> shaders);
         void KillEnemy(const std::string name1,
             const std::string name2,
             float time,
@@ -59,13 +67,14 @@ namespace m1
             int* enemyLives,
             std::unordered_map<int, int> map,
             float* translateX,
-            float* tx,
+            float tx[][5],
             float* scaleEnemyX,
             float* scaleEnemyY,
             bool* isMoving,
             glm::mat3& modelMatrix,
             std::unordered_map<std::string, Mesh*>& meshes,
             std::unordered_map<std::string, Shader*> shaders);
+        bool equals(const enemy& e1, const enemy& e2);
 
     protected:
         float cx, cy;
@@ -79,18 +88,17 @@ namespace m1
 
         float translateX[9];
         float translateY[9];
-        float tx[9]; 
+        float tx[9][5]; 
         float ty;
 
         bool checkScale[9];
         bool checkButtonPressRight[9];
 
-        float angularStep[9];
+        float angularStep[9][5];
 
         // TODO(student): If you need any other class variables, define them here.
         Mesh* diamond;
-        Mesh* enemies[6];
-        Mesh* projectiles[9];
+        Mesh* projectiles[9][5];
 
         bool isEmptyCell[9];
         bool isMoving[9];
@@ -105,7 +113,7 @@ namespace m1
 
         float counterEnemies;
         float counterStars;
-        float counterProjectiles;
+        float counterProjectiles[9];
         int randomTime;
         int randomTimeStars;
         int randomTimeProjectiles;
@@ -122,9 +130,38 @@ namespace m1
             Mesh* square;
             Mesh* diamond;
             std::vector<Mesh *> stars;
+            glm::vec3 color;
         } box;
 
+        typedef struct projectile {
+            Mesh* star;
+            glm::vec3 color;
+            std::string name;
+            float translateX;
+            float angularStep;
+        } projectile;
+
+        typedef struct cell {
+            Mesh* square;
+            Mesh* diamond;
+            glm::vec3 cellColor;
+            glm::vec3 diamondColor;
+            bool isEmpty;
+            std::string diamondName;
+            std::string squareName;
+            std::vector<projectile> projectiles;
+            float scaleX;
+            float scaleY;
+            float time;
+            bool checkScale;
+            int line;
+        } cell;
+
         box boxes[4];
+        cell cells[9];
+        std::vector<enemy> enemies;
+        enemy e;
+        int j;
 
         glm::vec3 colors[4];
 
@@ -171,5 +208,17 @@ namespace m1
 
         glm::vec3 cellColor[9];
         std::queue<glm::vec3> lineColors[3];
+        int lastProjectile;
+        bool isMovingProjectile[9][5];
+
+        glm::vec3 enemiesSpawnIn[3];
+        glm::vec3 enemiesSpawnOut[3];
+
+        float enemyCenter[3];
+        int k;
+        float spawnEnemy[3];
+        std::vector<enemy> firstLine;
+        std::vector<enemy> secondLine;
+        std::vector<enemy> thirdLine;
     };
 }   // namespace m1
