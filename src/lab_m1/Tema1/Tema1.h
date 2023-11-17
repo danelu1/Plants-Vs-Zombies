@@ -58,22 +58,6 @@ namespace m1
             glm::mat3& matrix,
             std::unordered_map<std::string, Mesh*> meshes,
             std::unordered_map<std::string, Shader*> shaders);
-        void KillEnemy(const std::string name1,
-            const std::string name2,
-            float time,
-            int line,
-            float x,
-            glm::vec3 color,
-            int* enemyLives,
-            std::unordered_map<int, int> map,
-            float* translateX,
-            float tx[][5],
-            float* scaleEnemyX,
-            float* scaleEnemyY,
-            bool* isMoving,
-            glm::mat3& modelMatrix,
-            std::unordered_map<std::string, Mesh*>& meshes,
-            std::unordered_map<std::string, Shader*> shaders);
         bool equals(const enemy& e1, const enemy& e2);
 
     protected:

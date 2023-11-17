@@ -60,25 +60,6 @@ void Tema1::DisplayDiamond(const std::string& name,
     matrix = initialMatrix;
 }
 
-void Tema1::KillEnemy(const std::string name1,
-    const std::string name2,
-    float time,
-    int line,
-    float x,
-    glm::vec3 color,
-    int* enemyLives,
-    std::unordered_map<int, int> map,
-    float* translateX,
-    float tx[][5],
-    float* scaleEnemyX,
-    float* scaleEnemyY,
-    bool* isMoving,
-    glm::mat3& modelMatrix,
-    std::unordered_map<std::string, Mesh*>& meshes,
-    std::unordered_map<std::string, Shader*> shaders)
-{
-}
-
 bool m1::Tema1::equals(const enemy& e1, const enemy& e2)
 {
     return (e1.innerName == e2.innerName) && (e1.outerName == e2.outerName);
@@ -384,8 +365,6 @@ void Tema1::Update(float deltaTimeSeconds)
         enemies.push_back(e);
         j++;
 
-        cout << e.lives << endl;
-
         if (line == 0) {
             firstLine.push_back(e);
         }
@@ -476,6 +455,61 @@ void Tema1::Update(float deltaTimeSeconds)
             cells[i].projectiles.end());
     }
 
+
+    for (int i = 0; i < 9; i++) {
+        for (auto& en : enemies) {
+            auto it1 = std::find_if(firstLine.begin(), firstLine.end(), [&](const enemy& e) {
+                return equals(e, en);
+                });
+            auto it2 = std::find_if(secondLine.begin(), secondLine.end(), [&](const enemy& e) {
+                return equals(e, en);
+                });
+            auto it3 = std::find_if(thirdLine.begin(), thirdLine.end(), [&](const enemy& e) {
+                return equals(e, en);
+                });
+
+            if (it1 != firstLine.end()) {
+                for (projectile p : cells[i].projectiles) {
+                    if (CheckCollision(x_projectile[i] + p.translateX, y_projectile[i] + starCenterDistance,
+                        1200 + en.translateX, spawnEnemy[0] + 40, l + y, hexagoneRadius) && p.color == en.outerColor) {
+                        en.lives--;
+                    }
+                }
+
+                if (en.lives == 0) {
+                    break;
+                }
+            }
+
+            if (it2 != secondLine.end()) {
+                for (projectile p : cells[i].projectiles) {
+                    if (CheckCollision(x_projectile[i] + p.translateX, y_projectile[i] + starCenterDistance,
+                        1200 + en.translateX, spawnEnemy[1] + 40, l + y, hexagoneRadius) && p.color == en.outerColor) {
+                        en.lives--;
+                    }
+                }
+
+                if (en.lives == 0) {
+                    break;
+                }
+            }
+
+            if (it3 != thirdLine.end()) {
+                for (projectile p : cells[i].projectiles) {
+                    if (CheckCollision(x_projectile[i] + p.translateX, y_projectile[i] + starCenterDistance,
+                        1200 + en.translateX, spawnEnemy[2] + 40, l + y, hexagoneRadius) && p.color == en.outerColor) {
+                        en.lives--;
+                    }
+                }
+
+                if (en.lives == 0) {
+                    break;
+                }
+            }
+        }
+    }
+
+
     // Checking for collision by traversing all the cells and enemies and for each enemy
     // checking if it is in the "firstLine", "secondLine" or "thirdLine" vector.
     for (int i = 0; i < 9; i++) {
@@ -504,7 +538,6 @@ void Tema1::Update(float deltaTimeSeconds)
                             p.color == en.outerColor;
                         }),
                     cells[i].projectiles.end());
-                en.lives--;
             }
 
             if (it2 != secondLine.end()) {
@@ -521,7 +554,6 @@ void Tema1::Update(float deltaTimeSeconds)
                             p.color == en.outerColor;
                         }),
                     cells[i].projectiles.end());
-                en.lives--;
             }
 
             if (it3 != thirdLine.end()) {
@@ -538,28 +570,15 @@ void Tema1::Update(float deltaTimeSeconds)
                             p.color == en.outerColor;
                         }),
                     cells[i].projectiles.end());
-                en.lives--;
             }
         }
     }
 
-    /*for (int i = 0; i < enemies.size(); i++) {
-        printf("Enemy %d has %d lives\n", i + 1, enemies[i].lives);
-    }*/
-
-    //for (int i = 0; i < enemies.size(); i++) {
-    //    if (enemies[i].lives <= 0) {
-    //        meshes.erase(enemies[i].innerName);
-    //        meshes.erase(enemies[i].outerName);
-    //        printf("MAMA\n");
-    //    }
-    //}
-
-    //enemies.erase(
-    //    std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) {
-    //        return e.lives <= 0;
-    //        }),
-    //    enemies.end());
+    enemies.erase(
+        std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) {
+            return e.lives == 0;
+            }),
+        enemies.end());
 
     // Collision between enemy and diamond.
     for (int i = 0; i < 9; i++) {
