@@ -86,12 +86,7 @@ void Tema1::Init()
     camera->Update();
     GetCameraInput()->SetActive(false);
 
-    sx = 1;
-    sy = 1;
-    check = true;
     isPressed = false;
-    ty = 0;
-    lastProjectile = 0;
 
     line = -1;
     color = -1;
@@ -100,23 +95,6 @@ void Tema1::Init()
     randomStarYDown = 30 * cos(3 * M_PI / 10);
     x_inventory = 870;
     y_inventory = 580;
-
-    for (int i = 0; i < 9; i++) {
-        scaleX[i] = 1;
-        scaleY[i] = 1;
-    }
-
-    for (int i = 0; i < 9; i++) {
-        isEmptyCell[i] = true;
-    }
-
-    for (int i = 0; i < 9; i++) {
-        isMoving[i] = false;
-    }
-
-    for (int i = 0; i < 9; i++) {
-        checkScale[i] = true;
-    }
 
     for (int i = 0; i < 9; i++) {
         checkButtonPressRight[i] = false;
@@ -128,10 +106,6 @@ void Tema1::Init()
 
     for (int i = 0; i < 3; i++) {
         flag[i] = true;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        distance[i] = 0;
     }
 
     colors[0] = glm::vec3(1, 0.5, 0); // orange
@@ -150,10 +124,6 @@ void Tema1::Init()
     hexagoneRadius = 40;
     diamondRadius = 40;
     index = 0;
-
-    for (int i = 0; i < 9; i++) {
-        counterProjectiles[i] = 0;
-    }
 
     pentagoneLength = 2 * 20 * sin(M_PI / 10);
     sine = sin(M_PI / 10);
@@ -279,24 +249,6 @@ void Tema1::Init()
         isDragged[i] = false;
     }
 
-    for (int i = 0; i < 3; i++) {
-        enemyLives[i] = 0;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        scaleOut[i] = false;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        scaleIn[i] = false;
-    }
-
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 5; j++) {
-            isMovingProjectile[i][j] = false;
-        }
-    }
-
     j = 0;
     k = 1;
 }
@@ -412,8 +364,8 @@ void Tema1::Update(float deltaTimeSeconds)
         }
     }
 
-    // Launch a star only when the cell is not empty, the time passed and the line is the same
-    // for the enemy and for the diamond.
+    // Launch a star only when the cell is not empty, the time passed, the line is the same
+    // for the enemy and for the diamond and they have the same color.
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < enemies.size(); j++) {
             if (!cells[i].isEmpty && cells[i].line == enemies[j].line && cells[i].time > 1 && cells[i].diamondColor == enemies[j].outerColor) {
@@ -609,9 +561,9 @@ void Tema1::Update(float deltaTimeSeconds)
     }
     
 
-    //if (lives_no == 0) {
-    //    exit(0);
-    //}
+    if (lives_no == 0) {
+        exit(0);
+    }
 
     // Here I draw stars on screen based on the random time passed and the fact that a star
     // should not be drawn anymore if I clicked on it.

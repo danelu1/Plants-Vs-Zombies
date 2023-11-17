@@ -61,35 +61,10 @@ namespace m1
         bool equals(const enemy& e1, const enemy& e2);
 
     protected:
-        float cx, cy;
         glm::mat3 modelMatrix;
 
-        float scaleX[9];
-        float scaleY[9];
-        float scaleEnemy[3];
-        float scaleEnemyX[3];
-        float scaleEnemyY[3];
-
-        float translateX[9];
-        float translateY[9];
-        float tx[9][5]; 
-        float ty;
-
-        bool checkScale[9];
         bool checkButtonPressRight[9];
-
-        float angularStep[9][5];
-
-        // TODO(student): If you need any other class variables, define them here.
         Mesh* diamond;
-        Mesh* projectiles[9][5];
-
-        bool isEmptyCell[9];
-        bool isMoving[9];
-
-        glm::vec3 enemyColor1;
-        glm::vec3 enemyColor2;
-        glm::vec3 enemyColor3;
         glm::vec3 draggedColor;
         
         int line;
@@ -97,14 +72,9 @@ namespace m1
 
         float counterEnemies;
         float counterStars;
-        float counterProjectiles[9];
         int randomTime;
         int randomTimeStars;
         int randomTimeProjectiles;
-
-        float sx;
-        float sy;
-        bool check;
 
         typedef struct box {
             std::string squareName;
@@ -178,22 +148,10 @@ namespace m1
         bool isPressed;
         int index;
 
-        std::unordered_map<int, int> map;
-
-        int enemyLives[3];
-        float distance[3];
-        bool scaleOut[3];
-        bool scaleIn[3];
-
         float pentagoneLength;
         float sine;
         float l;
         float y;
-
-        glm::vec3 cellColor[9];
-        std::queue<glm::vec3> lineColors[3];
-        int lastProjectile;
-        bool isMovingProjectile[9][5];
 
         glm::vec3 enemiesSpawnIn[3];
         glm::vec3 enemiesSpawnOut[3];
