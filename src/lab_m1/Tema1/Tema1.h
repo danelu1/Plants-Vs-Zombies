@@ -28,7 +28,6 @@ namespace m1
             int lives;
             int line;
             int index;
-            bool checkScale;
             float centerY;
         } enemy;
 

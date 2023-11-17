@@ -333,13 +333,15 @@ void Tema1::Update(float deltaTimeSeconds)
 
     // Render all the enemies int the enemies vector.
     for (auto& e : enemies) {
-        modelMatrix = glm::mat3(1);
-        e.translateX -= 100 * deltaTimeSeconds;
+        if (!e.isScaling) {
+            modelMatrix = glm::mat3(1);
+            e.translateX -= 100 * deltaTimeSeconds;
 
-        modelMatrix *= transform2D::Translate(e.translateX, 0);
+            modelMatrix *= transform2D::Translate(e.translateX, 0);
 
-        RenderMesh2D(meshes[e.innerName], shaders["VertexColor"], modelMatrix);
-        RenderMesh2D(meshes[e.outerName], shaders["VertexColor"], modelMatrix);
+            RenderMesh2D(meshes[e.innerName], shaders["VertexColor"], modelMatrix);
+            RenderMesh2D(meshes[e.outerName], shaders["VertexColor"], modelMatrix);
+        }
     }
 
     // Decrement the number of lives if enemy reaches end line.
@@ -526,13 +528,38 @@ void Tema1::Update(float deltaTimeSeconds)
         }
     }
 
+    for (auto& e : enemies) {
+        if (e.lives == 0) {
+            modelMatrix = glm::mat3(1);
+            e.isScaling = true;
+
+            e.inner = object2D::CreateEnemy1(e.innerName, glm::vec3(1200 + e.translateX, enemiesSpawnIn[e.line].y, 2), 30, e.innerColor, true);
+            e.outer = object2D::CreateEnemy1(e.outerName, glm::vec3(1200 + e.translateX, enemiesSpawnOut[e.line].y, 1), 40, e.outerColor, true);
+            AddMeshToList(e.inner);
+            AddMeshToList(e.outer);
+
+            e.scaleX -= deltaTimeSeconds;
+            e.scaleY -= deltaTimeSeconds;
+
+            cout << e.scaleX << endl;
+
+            modelMatrix *= transform2D::Translate(1200 + e.translateX, enemiesSpawnOut[e.line].y + 40);
+            modelMatrix *= transform2D::Scale(e.scaleX, e.scaleY);
+            modelMatrix *= transform2D::Translate(- 1200 - e.translateX, - enemiesSpawnOut[e.line].y - 40);
+            RenderMesh2D(meshes[e.innerName], shaders["VertexColor"], modelMatrix);
+            RenderMesh2D(meshes[e.outerName], shaders["VertexColor"], modelMatrix);
+        }
+    }
+
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) {
-            return e.lives == 0;
+            return e.lives == 0 && e.scaleX <= 0.1f && e.scaleY <= 0.1f;
             }),
         enemies.end());
 
-    // Collision between enemy and diamond.
+    // Collision between enemy and diamond. For each diamond I check if its cell is not empty, because
+    // this means that the diamond is already placed in the game and so I can now check each enemy and
+    // see it its line is the same as the diamonds' and also if it is any collision between them.
     for (int i = 0; i < 9; i++) {
         if (!cells[i].isEmpty) {
             for (int j = 0; j < enemies.size(); j++) {
