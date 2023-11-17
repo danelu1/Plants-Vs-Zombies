@@ -409,7 +409,8 @@ void Tema1::Update(float deltaTimeSeconds)
             cells[i].projectiles.end());
     }
 
-
+    // Here I decrement the life of each enemy for whom collision with a projectile exists
+    // and also the color is the same.
     for (int i = 0; i < 9; i++) {
         for (auto& en : enemies) {
             auto it1 = std::find_if(firstLine.begin(), firstLine.end(), [&](const enemy& e) {
@@ -528,6 +529,7 @@ void Tema1::Update(float deltaTimeSeconds)
         }
     }
 
+    // Here I start scaling each enemies with 0 lives.
     for (auto& e : enemies) {
         if (e.lives == 0) {
             modelMatrix = glm::mat3(1);
@@ -541,8 +543,6 @@ void Tema1::Update(float deltaTimeSeconds)
             e.scaleX -= deltaTimeSeconds;
             e.scaleY -= deltaTimeSeconds;
 
-            cout << e.scaleX << endl;
-
             modelMatrix *= transform2D::Translate(1200 + e.translateX, enemiesSpawnOut[e.line].y + 40);
             modelMatrix *= transform2D::Scale(e.scaleX, e.scaleY);
             modelMatrix *= transform2D::Translate(- 1200 - e.translateX, - enemiesSpawnOut[e.line].y - 40);
@@ -551,6 +551,7 @@ void Tema1::Update(float deltaTimeSeconds)
         }
     }
 
+    // Here I remove each enemy with 0 lives and the scale factors smaller than a threshold.
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(), [](const auto& e) {
             return e.lives == 0 && e.scaleX <= 0.1f && e.scaleY <= 0.1f;
@@ -769,7 +770,7 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 
         if (starsOnScreen == 0) {
             counterStars = 0;
-            randomTimeStars = rand() % 10;
+            randomTimeStars = rand() % 5 + 2;
             starsOnScreen = 3;
             for (int i = 0; i < 3; i++) {
                 flag[i] = true;
