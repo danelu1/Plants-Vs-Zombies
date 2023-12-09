@@ -53,6 +53,15 @@ namespace m1
             std::vector<projectile> projectiles;
         } tank;
 
+        typedef struct building {
+            Mesh* body;
+            glm::vec3 pos;
+            std::string name;
+            float length;
+            float height;
+            float width;
+        } building;
+
         void Init() override;
 
     private:
@@ -93,14 +102,11 @@ namespace m1
             float deltaTime,
             std::unordered_map<std::string, Mesh*> meshes,
             std::unordered_map<std::string, Shader*> shaders);
-        void RenderEnemy(tank& enemy,
-            std::unordered_map<std::string, Mesh*> meshes,
-            std::unordered_map<std::string, Shader*> shaders,
-            glm::mat4 modelMatrix);
         void RenderEnemyMoving(tank& enemy,
             std::unordered_map<std::string, Mesh*> meshes,
             std::unordered_map<std::string, Shader*> shaders,
             glm::mat4& modelMatrix);
+        void CreateBuilding(building& building, int i);
 
     protected:
         implemented::Camera1* camera;
@@ -123,6 +129,7 @@ namespace m1
 
         tank player;
         std::vector<tank> enemies;
+        std::vector<building> buildings;
 
         float angularStep = 0;
 

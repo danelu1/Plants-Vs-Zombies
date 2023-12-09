@@ -172,20 +172,6 @@ void m1::Tema2::RotateEnemyRight(tank& enemy,
     RenderEnemyMoving(enemy, meshes, shaders, modelMatrix);
 }
 
-void m1::Tema2::RenderEnemy(tank& e,
-    std::unordered_map<std::string,
-    Mesh*> meshes, std::unordered_map<std::string,
-    Shader*> shaders, glm::mat4 modelMatrix)
-{
-    RenderMesh(meshes[e.bodyName], shaders["VertexColor"], modelMatrix);
-    RenderMesh(meshes[e.turretName], shaders["VertexColor"], modelMatrix);
-    RenderMesh(meshes[e.trackName1], shaders["VertexColor"], modelMatrix);
-    RenderMesh(meshes[e.trackName2], shaders["VertexColor"], modelMatrix);
-    RenderMesh(meshes[e.trackAdjName1], shaders["VertexColor"], modelMatrix);
-    RenderMesh(meshes[e.trackAdjName2], shaders["VertexColor"], modelMatrix);
-    RenderMesh(meshes[e.cannonName], shaders["VertexColor"], modelMatrix);
-}
-
 void m1::Tema2::RenderEnemyMoving(tank& enemy,
     std::unordered_map<std::string, Mesh*> meshes,
     std::unordered_map<std::string, Shader*> shaders,
@@ -244,6 +230,35 @@ void m1::Tema2::RenderEnemyMoving(tank& enemy,
     RenderMesh(meshes[enemy.cannonName], shaders["VertexColor"], modelMatrix);
 
     modelMatrix = initialMatrix;
+}
+
+void m1::Tema2::CreateBuilding(building& building, int i)
+{
+    building.name = "building" + std::to_string(i);
+    building.height = rand() % 4 + 2;
+    building.length = rand() % 2 + 3;
+    building.width = rand() % 2 + 2;
+    int c = rand() % 4;
+
+    if (c == 0) {
+        building.pos = glm::vec3(rand() % 10 - 10, building.height / 2 - 0.5, rand() % 10 - 10);
+    }
+    else if (c == 1) {
+        building.pos = glm::vec3(rand() % 10 + 10, building.height / 2 - 0.5, rand() % 10 + 10);
+    }
+    else if (c == 2) {
+        building.pos = glm::vec3(rand() % 10 - 10, building.height / 2 - 0.5, rand() % 10 + 10);
+    }
+    else if (c == 3) {
+        building.pos = glm::vec3(rand() % 10 + 10, building.height / 2 - 0.5, rand() % 10 - 10);
+    }
+
+    building.body = object3D::CreatePyramid(building.name, building.pos, building.length,
+        building.width, building.length, building.width, building.height, glm::vec3(0.2), true);
+
+    AddMeshToList(building.body);
+
+    buildings.push_back(building);
 }
 
 
@@ -330,6 +345,12 @@ void Tema2::Init()
 
     surface = object3D::CreatePyramid("surface", glm::vec3(), 50, 50, 50, 50, 0.05, glm::vec3(0, 1, 0), true);
     AddMeshToList(surface);
+
+    building b;
+
+    for (int i = 0; i < 10; i++) {
+        CreateBuilding(b, i + 1);
+    }
 }
 
 
@@ -347,41 +368,41 @@ void Tema2::FrameStart()
 
 void Tema2::Update(float deltaTimeSeconds)
 {
-    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::mat4(1.0f);
     RenderMesh(meshes["surface"], shaders["VertexColor"], modelMatrix);
 
-    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
     modelMatrix *= transform3D::RotateOY(player.angle);
     RenderMesh(meshes["playerBody"], shaders["VertexColor"], modelMatrix);
 
-    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix *= transform3D::Translate(player.turretPos.x, player.turretPos.y, player.turretPos.z);
     modelMatrix *= transform3D::RotateOY(player.angle);
     RenderMesh(meshes["playerTurret"], shaders["VertexColor"], modelMatrix);
 
-    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix *= transform3D::Translate(player.trackPos1.x, player.trackPos1.y, player.trackPos1.z);
     modelMatrix *= transform3D::Translate(0.3, 0, 0);
     modelMatrix *= transform3D::RotateOY(player.angle);
     modelMatrix *= transform3D::Translate(-0.3, 0, 0);
     RenderMesh(meshes["playerTrack1"], shaders["VertexColor"], modelMatrix);
     
-    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix *= transform3D::Translate(player.trackPos2.x, player.trackPos2.y, player.trackPos2.z);
     modelMatrix *= transform3D::Translate(-0.3, 0, 0);
     modelMatrix *= transform3D::RotateOY(player.angle);
     modelMatrix *= transform3D::Translate(0.3, 0, 0);
     RenderMesh(meshes["playerTrack2"], shaders["VertexColor"], modelMatrix);
     
-    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix *= transform3D::Translate(player.trackAdjPos1.x, player.trackAdjPos1.y, player.trackAdjPos1.z);
     modelMatrix *= transform3D::Translate(0.3, 0, 0);
     modelMatrix *= transform3D::RotateOY(player.angle);
     modelMatrix *= transform3D::Translate(-0.3, 0, 0);
     RenderMesh(meshes["playerTrackAdj1"], shaders["VertexColor"], modelMatrix);
 
-    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::mat4(1.0f);
     modelMatrix *= transform3D::Translate(player.trackAdjPos2.x, player.trackAdjPos2.y, player.trackAdjPos2.z);
     modelMatrix *= transform3D::Translate(-0.3, 0, 0);
     modelMatrix *= transform3D::RotateOY(player.angle);
@@ -396,6 +417,59 @@ void Tema2::Update(float deltaTimeSeconds)
     RenderMesh(meshes["playerCannon"], shaders["VertexColor"], modelMatrix);
 
     counterProjectile += deltaTimeSeconds;
+    
+    // Render the buildings on the map.
+    for (auto b : buildings) {
+        modelMatrix = glm::mat4(1.0f);
+        RenderMesh(meshes[b.name], shaders["VertexColor"], modelMatrix);
+    }
+
+    // Checking the collision between the tanks and the buildings by using
+    // the coordinates of the tank and the coordinates of the building, but
+    // with the same local y-axis.
+    for (auto b : buildings) {
+        player.projectiles.erase(
+            std::remove_if(player.projectiles.begin(), player.projectiles.end(), [&](const auto p) {
+                    glm::vec3 bPos = glm::vec3(b.pos.x, b.pos.y - b.height / 2 + 0.75, b.pos.z);
+                    return CheckCollision(p.pos, bPos, 0.1, b.length / 2);
+                }),
+            player.projectiles.end()
+        );
+    }
+
+    for (auto b : buildings) {
+        glm::vec3 bPos = glm::vec3(b.pos.x, b.pos.y - b.height / 2 + 0.75, b.pos.z);
+        if (CheckCollision(player.bodyPos, bPos, 1, b.length / 2)) {
+            glm::vec3 diff = player.bodyPos - bPos;
+            float positive = abs(b.length / 2 + 1 - glm::distance(player.bodyPos, bPos));
+            glm::vec3 p = positive * glm::normalize(diff);
+
+            player.bodyPos += 0.5f * p;
+            camera->position += 0.5f * p;
+            player.turretPos += 0.5f * p;
+            player.cannonPos += 0.5f * p;
+            player.trackPos1 += 0.5f * p;
+            player.trackPos2 += 0.5f * p;
+            player.trackAdjPos1 += 0.5f * p;
+            player.trackAdjPos2 += 0.5f * p;
+        }
+
+        for (auto& e : enemies) {
+            if (CheckCollision(e.bodyPos, bPos, 1, b.length / 2)) {
+                glm::vec3 diff1 = e.bodyPos - bPos;
+                float positive1 = abs(b.length / 2 + 1 - glm::distance(e.bodyPos, bPos));
+                glm::vec3 p1 = positive1 * glm::normalize(diff1);
+
+                e.bodyPos += 0.5f * p1;
+                e.turretPos += 0.5f * p1;
+                e.cannonPos += 0.5f * p1;
+                e.trackPos1 += 0.5f * p1;
+                e.trackPos2 += 0.5f * p1;
+                e.trackAdjPos1 += 0.5f * p1;
+                e.trackAdjPos2 += 0.5f * p1;
+            }
+        }
+    }
 
     // Making the projectiles move along the cannon axis.
     for (auto& p : player.projectiles) {
@@ -414,14 +488,16 @@ void Tema2::Update(float deltaTimeSeconds)
     for (auto& e : enemies) {
         player.projectiles.erase(
             std::remove_if(player.projectiles.begin(), player.projectiles.end(), [&](const auto& p) {
-                return abs(p.pos.x) >= 50
-                    || abs(p.pos.z) >= 50
+                return abs(p.pos.x) >= 40
+                    || abs(p.pos.z) >= 40
                     || CheckCollision(p.pos, e.bodyPos, 0.1, 1);
                 }),
             player.projectiles.end()
         );
     }
 
+    // Check the collision player-enemy, enemy-enemy and moving them backwards
+    // to get them out of the collision phase.
     for (auto& e : enemies) {
         if (CheckCollision(player.bodyPos, e.bodyPos, 1, 1)) {
             glm::vec3 diff = e.bodyPos - player.bodyPos;
@@ -430,7 +506,7 @@ void Tema2::Update(float deltaTimeSeconds)
 
             player.bodyPos += -0.5f * p;
             e.bodyPos += 0.5f * p;
-            camera->position += p * -0.5f;
+            camera->position += -0.5f * p;
             
             e.turretPos += 0.5f * p;
             player.turretPos += -0.5f * p;
@@ -449,6 +525,35 @@ void Tema2::Update(float deltaTimeSeconds)
 
             player.trackAdjPos2 += -0.5f * p;
             e.trackAdjPos2 += 0.5f * p;
+        }
+
+        for (auto& e1 : enemies) {
+            if (CheckCollision(e.bodyPos, e1.bodyPos, 1, 1)) {
+                glm::vec3 diff1 = e.bodyPos - player.bodyPos;
+                float positive1 = abs(2 - glm::distance(e.bodyPos, e1.bodyPos));
+                glm::vec3 p1 = positive1 * glm::normalize(diff1);
+
+                e.bodyPos += -0.5f * p1;
+                e1.bodyPos += 0.5f * p1;
+
+                e.turretPos += -0.5f * p1;
+                e1.turretPos += 0.5f * p1;
+
+                e.cannonPos += -0.5f * p1;
+                e1.cannonPos += 0.5f * p1;
+
+                e.trackPos1 += -0.5f * p1;
+                e1.trackPos1 += 0.5f * p1;
+
+                e.trackPos2 += -0.5f * p1;
+                e1.trackPos2 += 0.5f * p1;
+
+                e.trackAdjPos1 += -0.5f * p1;
+                e1.trackAdjPos1 += 0.5f * p1;
+
+                e.trackAdjPos2 += -0.5f * p1;
+                e1.trackAdjPos2 += 0.5f * p1;
+            }
         }
     }
 
@@ -471,6 +576,8 @@ void Tema2::Update(float deltaTimeSeconds)
             MoveEnemy(e, e.choice, randomTime, deltaTimeSeconds, meshes, shaders);
         }
     }
+
+    modelMatrix = glm::mat4(1);
 
     // Render the camera target. This is useful for understanding where
     // the rotation point is, when moving in third-person camera mode.
@@ -538,8 +645,6 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
             player.cannonPos.x += 2 * deltaTime * sin(player.angle);
 
             camera->TranslateForward(2 * deltaTime);
-            pos.x += 2 * deltaTime * sin(player.angle);
-            pos.z -= 2 * deltaTime * cos(player.angle);
         }
 
         if (window->KeyHold(GLFW_KEY_S)) {
@@ -558,9 +663,8 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
             player.trackAdjPos2.x -= 2 * deltaTime * sin(player.angle);
             player.turretPos.x -= 2 * deltaTime * sin(player.angle);
             player.cannonPos.x -= 2 * deltaTime * sin(player.angle);
+
             camera->TranslateForward(-2 * deltaTime);
-            pos.x -= 2 * deltaTime * sin(player.angle);
-            pos.z += 2 * deltaTime * cos(player.angle);
         }
 
         if (window->KeyHold(GLFW_KEY_A)) {
