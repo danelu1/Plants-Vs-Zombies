@@ -16,6 +16,7 @@ using namespace m1;
  *  and the order in which they are called, see `world.cpp`.
  */
 
+// Function for checking collision between any game component.
 bool CheckCollision(glm::vec3 center1, glm::vec3 center2, float radius1, float radius2)
 {
     float distance = glm::distance(center2, center1);
@@ -23,6 +24,8 @@ bool CheckCollision(glm::vec3 center1, glm::vec3 center2, float radius1, float r
     return distance < radius1 + radius2;
 }
 
+// Function which creates an opponent at random coordinates based on the plane
+// quarters.
 void Tema2::CreateEnemy(tank& enemy, int i)
 {
     enemy.bodyName = "enemyBody" + std::to_string(i);
@@ -37,6 +40,7 @@ void Tema2::CreateEnemy(tank& enemy, int i)
     enemy.angle = 0;
     enemy.isMoving = false;
     enemy.choice = -1;
+    enemy.HP = 50;
 
     float x_body = 0;
     float z_body = 0;
@@ -60,7 +64,7 @@ void Tema2::CreateEnemy(tank& enemy, int i)
 
     enemy.bodyPos = glm::vec3(x_body, 0.25, z_body);
     enemy.turretPos = glm::vec3(x_body, 0.5, z_body);
-    enemy.cannonPos = glm::vec3(x_body, 0.5, z_body - 0.4);
+    enemy.cannonPos = glm::vec3(x_body, 0.5, z_body - 0.2);
     enemy.trackPos1 = glm::vec3(x_body - 0.3, 0.05, z_body);
     enemy.trackPos2 = glm::vec3(x_body + 0.3, 0.05, z_body);
     enemy.trackAdjPos1 = glm::vec3(x_body - 0.3, 0.125, z_body);
@@ -68,7 +72,7 @@ void Tema2::CreateEnemy(tank& enemy, int i)
 
     enemy.body = object3D::CreatePyramid(enemy.bodyName, glm::vec3(), 0.8, 2, 0.7, 1.75, 0.3, glm::vec3(0, 0, 0), true);
     enemy.turret = object3D::CreatePyramid(enemy.turretName, glm::vec3(), 0.8, 1, 0.6, 0.75, 0.2, glm::vec3(0, 0.2, 0), true);
-    enemy.cannon = object3D::CreateCannon(enemy.cannonName, glm::vec3(), 0.05, 1, 100, glm::vec3(0.5, 0.5, 0.5), true);
+    enemy.cannon = object3D::CreateCannon(enemy.cannonName, glm::vec3(), 0.05, 1.2, 100, glm::vec3(0.5, 0.5, 0.5), true);
     enemy.track1 = object3D::CreatePyramid(enemy.trackName1, glm::vec3(), 0.2, 1.6, 0.25, 2, 0.1, glm::vec3(0.5, 0.5, 0.5), true);
     enemy.track2 = object3D::CreatePyramid(enemy.trackName2, glm::vec3(), 0.2, 1.6, 0.25, 2, 0.1, glm::vec3(0.5, 0.5, 0.5), true);
     enemy.trackAdj1 = object3D::CreatePyramid(enemy.trackAdjName1, glm::vec3(), 0.25, 2, 0.25, 2, 0.05, glm::vec3(0.5, 0.5, 0.5), true);
@@ -85,6 +89,8 @@ void Tema2::CreateEnemy(tank& enemy, int i)
     enemies.push_back(enemy);
 }
 
+// Function for moving enemies according to the random type of movement
+// chosen(forward, backward, left, right) for a random time.
 void m1::Tema2::MoveEnemy(tank& enemy,
     int choice,
     float randomTime,
@@ -106,6 +112,7 @@ void m1::Tema2::MoveEnemy(tank& enemy,
     }
 }
 
+// Function for moving the enemies forward.
 void m1::Tema2::TranslateEnemyFront(tank& enemy,
     float deltaTime,
     std::unordered_map<std::string, Mesh*> meshes,
@@ -130,6 +137,7 @@ void m1::Tema2::TranslateEnemyFront(tank& enemy,
     RenderEnemyMoving(enemy, meshes, shaders, modelMatrix);
 }
 
+// Function for moving the enemies backward.
 void m1::Tema2::TranslateEnemyBack(tank& enemy,
     float deltaTime,
     std::unordered_map<std::string, Mesh*> meshes,
@@ -154,6 +162,7 @@ void m1::Tema2::TranslateEnemyBack(tank& enemy,
     RenderEnemyMoving(enemy, meshes, shaders, modelMatrix);
 }
 
+// Function for rotating the enemies to the left.
 void m1::Tema2::RotateEnemyLeft(tank& enemy,
     float deltaTime,
     std::unordered_map<std::string, Mesh*> meshes,
@@ -163,6 +172,7 @@ void m1::Tema2::RotateEnemyLeft(tank& enemy,
     RenderEnemyMoving(enemy, meshes, shaders, modelMatrix);
 }
 
+// Function for rotating the enemies to the right.
 void m1::Tema2::RotateEnemyRight(tank& enemy,
     float deltaTime,
     std::unordered_map<std::string, Mesh*> meshes,
@@ -172,6 +182,7 @@ void m1::Tema2::RotateEnemyRight(tank& enemy,
     RenderEnemyMoving(enemy, meshes, shaders, modelMatrix);
 }
 
+// Function for rendering the enemies while they are moving.
 void m1::Tema2::RenderEnemyMoving(tank& enemy,
     std::unordered_map<std::string, Mesh*> meshes,
     std::unordered_map<std::string, Shader*> shaders,
@@ -181,13 +192,13 @@ void m1::Tema2::RenderEnemyMoving(tank& enemy,
 
     modelMatrix *= transform3D::Translate(enemy.bodyPos.x, enemy.bodyPos.y, enemy.bodyPos.z);
     modelMatrix *= transform3D::RotateOY(enemy.angle);
-    RenderMesh(meshes[enemy.bodyName], shaders["VertexColor"], modelMatrix);
+    RenderSimpleMesh(meshes[enemy.bodyName], shaders["CustomShader"], modelMatrix, enemy.HP, 1);
 
     modelMatrix = initialMatrix;
 
     modelMatrix *= transform3D::Translate(enemy.turretPos.x, enemy.turretPos.y, enemy.turretPos.z);
     modelMatrix *= transform3D::RotateOY(enemy.angle);
-    RenderMesh(meshes[enemy.turretName], shaders["VertexColor"], modelMatrix);
+    RenderSimpleMesh(meshes[enemy.turretName], shaders["CustomShader"], modelMatrix, enemy.HP, 2);
 
     modelMatrix = initialMatrix;
 
@@ -195,7 +206,7 @@ void m1::Tema2::RenderEnemyMoving(tank& enemy,
     modelMatrix *= transform3D::Translate(0.3, 0, 0);
     modelMatrix *= transform3D::RotateOY(enemy.angle);
     modelMatrix *= transform3D::Translate(-0.3, 0, 0);
-    RenderMesh(meshes[enemy.trackName1], shaders["VertexColor"], modelMatrix);
+    RenderSimpleMesh(meshes[enemy.trackName1], shaders["CustomShader"], modelMatrix, enemy.HP, 3);
 
     modelMatrix = initialMatrix;
 
@@ -203,7 +214,7 @@ void m1::Tema2::RenderEnemyMoving(tank& enemy,
     modelMatrix *= transform3D::Translate(-0.3, 0, 0);
     modelMatrix *= transform3D::RotateOY(enemy.angle);
     modelMatrix *= transform3D::Translate(0.3, 0, 0);
-    RenderMesh(meshes[enemy.trackName2], shaders["VertexColor"], modelMatrix);
+    RenderSimpleMesh(meshes[enemy.trackName2], shaders["CustomShader"], modelMatrix, enemy.HP, 3);
 
     modelMatrix = initialMatrix;
 
@@ -211,7 +222,7 @@ void m1::Tema2::RenderEnemyMoving(tank& enemy,
     modelMatrix *= transform3D::Translate(0.3, 0, 0);
     modelMatrix *= transform3D::RotateOY(enemy.angle);
     modelMatrix *= transform3D::Translate(-0.3, 0, 0);
-    RenderMesh(meshes[enemy.trackAdjName1], shaders["VertexColor"], modelMatrix);
+    RenderSimpleMesh(meshes[enemy.trackAdjName1], shaders["CustomShader"], modelMatrix, enemy.HP, 3);
 
     modelMatrix = initialMatrix;
 
@@ -219,19 +230,21 @@ void m1::Tema2::RenderEnemyMoving(tank& enemy,
     modelMatrix *= transform3D::Translate(-0.3, 0, 0);
     modelMatrix *= transform3D::RotateOY(enemy.angle);
     modelMatrix *= transform3D::Translate(0.3, 0, 0);
-    RenderMesh(meshes[enemy.trackAdjName2], shaders["VertexColor"], modelMatrix);
+    RenderSimpleMesh(meshes[enemy.trackAdjName2], shaders["CustomShader"], modelMatrix, enemy.HP, 3);
 
     modelMatrix = initialMatrix;
 
     modelMatrix *= transform3D::Translate(enemy.cannonPos.x, enemy.cannonPos.y, enemy.cannonPos.z);
-    modelMatrix *= transform3D::Translate(0, 0, 0.4);
+    modelMatrix *= transform3D::Translate(0, 0, 0.2);
     modelMatrix *= transform3D::RotateOY(enemy.angle);
-    modelMatrix *= transform3D::Translate(0, 0, -0.4);
-    RenderMesh(meshes[enemy.cannonName], shaders["VertexColor"], modelMatrix);
+    modelMatrix *= transform3D::Translate(0, 0, -0.2);
+    RenderSimpleMesh(meshes[enemy.cannonName], shaders["CustomShader"], modelMatrix, enemy.HP, 3);
 
     modelMatrix = initialMatrix;
 }
 
+// Function for creating a building at random coordinates(a building may be spawn
+// anywhere, because in case of collision the tanks are being moved outside it).
 void m1::Tema2::CreateBuilding(building& building, int i)
 {
     building.name = "building" + std::to_string(i);
@@ -283,10 +296,9 @@ void Tema2::Init()
     fov = 50;
 
     camera = new implemented::Camera1();
-    pos = glm::vec3(0.4f, 0.25, 4.f);
-    camera->Set(pos, glm::vec3(0.4f, 0.25, 0), glm::vec3(0, 1, 0));
+    camera->Set(glm::vec3(0.4f, 0.25, 4.f), glm::vec3(0.4f, 0.25, 0), glm::vec3(0, 1, 0));
     aux = new implemented::Camera1();
-    aux->Set(pos, glm::vec3(0.4f, 0.25, 0), glm::vec3(0, 1, 0));
+    aux->Set(glm::vec3(0.4f, 0.25, 4.f), glm::vec3(0.4f, 0.25, 0), glm::vec3(0, 1, 0));
 
     projectionMatrix = glm::perspective(RADIANS(60), window->props.aspectRatio, 0.01f, 200.0f);
 
@@ -298,7 +310,7 @@ void Tema2::Init()
     player.trackAdjPos1 = glm::vec3(0.1, 0.125, 1);
     player.trackAdjPos2 = glm::vec3(0.7, 0.125, 1);
     player.turretPos = glm::vec3(0.4, 0.5, 1);
-    player.cannonPos = glm::vec3(0.4, 0.5, 0.6);
+    player.cannonPos = glm::vec3(0.4, 0.5, 0.8);
 
     player.angle = 0;
 
@@ -320,7 +332,7 @@ void Tema2::Init()
     player.turret = object3D::CreatePyramid("playerTurret", glm::vec3(), 0.8, 1, 0.6, 0.75, 0.2, glm::vec3(0, 0.2, 0), true);
     AddMeshToList(player.turret);
 
-    player.cannon = object3D::CreateCannon("playerCannon", glm::vec3(), 0.05, 1, 100, glm::vec3(0.5, 0.5, 0.5), true);
+    player.cannon = object3D::CreateCannon("playerCannon", glm::vec3(), 0.05, 1.2, 100, glm::vec3(0.5, 0.5, 0.5), true);
     AddMeshToList(player.cannon);
 
     Mesh* s = new Mesh("sphere");
@@ -341,8 +353,6 @@ void Tema2::Init()
         CreateEnemy(e, j + 1);
     }
 
-    choice = rand() % 4;
-
     surface = object3D::CreatePyramid("surface", glm::vec3(), 50, 50, 50, 50, 0.05, glm::vec3(0, 1, 0), true);
     AddMeshToList(surface);
 
@@ -351,6 +361,12 @@ void Tema2::Init()
     for (int i = 0; i < 10; i++) {
         CreateBuilding(b, i + 1);
     }
+
+    Shader* shader = new Shader("CustomShader");
+    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
+    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "Tema2", "shaders", "FragmentShader.glsl"), GL_FRAGMENT_SHADER);
+    shader->CreateAndLink();
+    shaders[shader->GetName()] = shader;
 }
 
 
@@ -411,9 +427,9 @@ void Tema2::Update(float deltaTimeSeconds)
 
     modelMatrix = glm::mat4(1.0f);
     modelMatrix *= transform3D::Translate(player.cannonPos.x, player.cannonPos.y, player.cannonPos.z);
-    modelMatrix *= transform3D::Translate(0, 0, 0.4);
+    modelMatrix *= transform3D::Translate(0, 0, 0.2);
     modelMatrix *= transform3D::RotateOY(player.angle);
-    modelMatrix *= transform3D::Translate(0, 0, -0.4);
+    modelMatrix *= transform3D::Translate(0, 0, -0.2);
     RenderMesh(meshes["playerCannon"], shaders["VertexColor"], modelMatrix);
 
     counterProjectile += deltaTimeSeconds;
@@ -424,9 +440,7 @@ void Tema2::Update(float deltaTimeSeconds)
         RenderMesh(meshes[b.name], shaders["VertexColor"], modelMatrix);
     }
 
-    // Checking the collision between the tanks and the buildings by using
-    // the coordinates of the tank and the coordinates of the building, but
-    // with the same local y-axis.
+    // Checking the collision between the enemies and the projectiles.
     for (auto b : buildings) {
         player.projectiles.erase(
             std::remove_if(player.projectiles.begin(), player.projectiles.end(), [&](const auto p) {
@@ -437,6 +451,9 @@ void Tema2::Update(float deltaTimeSeconds)
         );
     }
 
+    // Checking the collision between the tanks and the buildings by using
+    // the coordinates of the tank and the coordinates of the building, but
+    // with the same local y-axis.
     for (auto b : buildings) {
         glm::vec3 bPos = glm::vec3(b.pos.x, b.pos.y - b.height / 2 + 0.75, b.pos.z);
         if (CheckCollision(player.bodyPos, bPos, 1, b.length / 2)) {
@@ -486,6 +503,12 @@ void Tema2::Update(float deltaTimeSeconds)
 
     // Collision between a projectile and an enemy.
     for (auto& e : enemies) {
+        for (auto p : player.projectiles) {
+            if (CheckCollision(p.pos, e.bodyPos, 0.1, 1)) {
+                e.HP -= 10.0f;
+            }
+        }
+
         player.projectiles.erase(
             std::remove_if(player.projectiles.begin(), player.projectiles.end(), [&](const auto& p) {
                 return abs(p.pos.x) >= 40
@@ -495,6 +518,14 @@ void Tema2::Update(float deltaTimeSeconds)
             player.projectiles.end()
         );
     }
+
+    // Here I remove ech enemy with HP smaller than 0.
+    enemies.erase(
+        std::remove_if(enemies.begin(), enemies.end(), [](const auto e) {
+            return e.HP <= 0;
+            }),
+        enemies.end()
+    );
 
     // Check the collision player-enemy, enemy-enemy and moving them backwards
     // to get them out of the collision phase.
@@ -507,6 +538,13 @@ void Tema2::Update(float deltaTimeSeconds)
             player.bodyPos += -0.5f * p;
             e.bodyPos += 0.5f * p;
             camera->position += -0.5f * p;
+
+          /*  if (!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT)) {
+                camera->position += -0.5f * p;
+            }
+            else {
+                camera->position += 0.5f * p;
+            }*/
             
             e.turretPos += 0.5f * p;
             player.turretPos += -0.5f * p;
@@ -578,6 +616,12 @@ void Tema2::Update(float deltaTimeSeconds)
     }
 
     modelMatrix = glm::mat4(1);
+
+    finishTime += deltaTimeSeconds;
+
+    if (finishTime > 120) {
+        exit(0);
+    }
 
     // Render the camera target. This is useful for understanding where
     // the rotation point is, when moving in third-person camera mode.
@@ -729,9 +773,6 @@ void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
         projectile p;
 
         p.angularStep = player.angle;
-        /*float x = player.cannonPos.x;
-        float y = player.cannonPos.y;
-        float z = player.cannonPos.z - 1;*/
 
         float x = player.turretPos.x + 1.4 * sin(p.angularStep);
         float y = player.turretPos.y;
@@ -762,9 +803,7 @@ void Tema2::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button release event
     if (button == 2) {
-        //camera->Set(glm::vec3(0.4f, 0.25, 4.f), glm::vec3(0.4f, 0.25, 0), glm::vec3(0, 1, 0));
         camera->Set(aux->position, glm::vec3(0.4f, 0.25, 0), aux->up);
-        //camera->Set(auxpos, glm::vec3(0.4f, 0.25, 0), auxup);
         camera->right = aux->right;
         camera->forward = aux->forward;
         camera->position = aux->position;
@@ -781,5 +820,40 @@ void Tema2::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)
 
 void Tema2::OnWindowResize(int width, int height)
 {
+}
+
+void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, float life, int component)
+{
+    if (!mesh || !shader || !shader->GetProgramID())
+        return;
+
+    // Render an object using the specified shader and the specified position
+    glUseProgram(shader->program);
+
+    // TODO(student): Get shader location for uniform mat4 "Model"
+    int modelLocation = glGetUniformLocation(shader->GetProgramID(), "Model");
+    // TODO(student): Set shader uniform "Model" to modelMatrix
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    // TODO(student): Get shader location for uniform mat4 "View"
+    int viewLocation = glGetUniformLocation(shader->GetProgramID(), "View");
+    // TODO(student): Set shader uniform "View" to viewMatrix
+    glm::mat4 viewMatrix = camera->GetViewMatrix();
+    glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+    // TODO(student): Get shader location for uniform mat4 "Projection"
+    int projectionLocation = glGetUniformLocation(shader->GetProgramID(), "Projection");
+    // TODO(student): Set shader uniform "Projection" to projectionMatrix
+    glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
+    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    GLint lifeLocation = glGetUniformLocation(shader->GetProgramID(), "lifeLocation");
+    glUniform1f(lifeLocation, life);
+
+    GLint componentLocation = glGetUniformLocation(shader->GetProgramID(), "componentLocation");
+    glUniform1i(componentLocation, component);
+
+    // Draw the object
+    glBindVertexArray(mesh->GetBuffers()->m_VAO);
+    glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
 }
 

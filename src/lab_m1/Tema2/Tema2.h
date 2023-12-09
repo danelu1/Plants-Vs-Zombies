@@ -50,6 +50,8 @@ namespace m1
             bool isMoving;
             int choice;
 
+            float HP;
+
             std::vector<projectile> projectiles;
         } tank;
 
@@ -107,6 +109,7 @@ namespace m1
             std::unordered_map<std::string, Shader*> shaders,
             glm::mat4& modelMatrix);
         void CreateBuilding(building& building, int i);
+        void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, float life, int component);
 
     protected:
         implemented::Camera1* camera;
@@ -123,10 +126,6 @@ namespace m1
         // TODO(student): If you need any other class variables, define them here.
         bool projection;
 
-        //float right, left, bottom, top, fov;
-        //float zFar;
-        //float zNear;
-
         tank player;
         std::vector<tank> enemies;
         std::vector<building> buildings;
@@ -137,13 +136,6 @@ namespace m1
         float time = 0;
         int i = 1;
         int j = 0;
-        bool isPressed = false;
-
-        float x_projectile = 0;
-        float y_projectile = 0;
-        float z_projectile = 0;
-
-        bool hasMoved = false;
 
         GLfloat right;
         GLfloat left;
@@ -151,10 +143,8 @@ namespace m1
         GLfloat top;
         GLfloat fov;
 
-        int auxx = 0;
-        glm::vec3 pos;
         float randomTime = 0;
-        int choice = 0;
+        float finishTime = 0;
 
         Mesh* surface;
     };
