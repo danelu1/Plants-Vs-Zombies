@@ -110,7 +110,11 @@ namespace m1
             std::unordered_map<std::string, Shader*> shaders,
             glm::mat4& modelMatrix);
         void CreateBuilding(building& building, int i);
-        void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, float life, int component);
+        void RenderSimpleMesh(Mesh* mesh,
+            Shader* shader,
+            const glm::mat4& modelMatrix,
+            float life,
+            int component);
 
     protected:
         implemented::Camera1* camera;
@@ -132,7 +136,6 @@ namespace m1
         std::vector<building> buildings;
 
         float counterProjectile = 0;
-        float time = 0;
         int i = 1;
         int j = 0;
 
@@ -144,6 +147,8 @@ namespace m1
 
         float randomTime = 0;
         float finishTime = 0;
+        int score = 0;
+        float waitTime = 0;
 
         Mesh* surface;
     };

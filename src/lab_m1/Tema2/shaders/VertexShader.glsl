@@ -29,22 +29,22 @@ void main()
     frag_texture = v_texture;
 
     if (componentLocation == 1) {
-        vec3 bodyColor = vec3(0, 0.5, 0);
-        vec3 grayColor = vec3(0);
+        vec3 bodyColor = vec3(0, 0.7, 0);
+        vec3 grayColor = vec3(0.1);
         float aux = lifeLocation / 100;
-        frag_color = mix(bodyColor, grayColor, aux);
+        frag_color = mix(grayColor, bodyColor, aux);
     }
     if (componentLocation == 2) {
-        vec3 turretColor = vec3(0, 0.7, 0);
-        vec3 grayColor = vec3(0);
+        vec3 turretColor = vec3(0, 0.8, 0);
+        vec3 grayColor = vec3(0.1);
         float aux = lifeLocation / 100;
-        frag_color = mix(turretColor, grayColor, aux);
+        frag_color = mix(grayColor, turretColor, aux);
     }
     if (componentLocation == 3) {
-        vec3 otherComponentsColor = vec3(0.7, 0, 0);
-        vec3 grayColor = vec3(0);
+        vec3 otherComponentsColor = vec3(1, 0, 0);
+        vec3 grayColor = vec3(0.1);
         float aux = lifeLocation / 100;
-        frag_color = mix(otherComponentsColor, grayColor, aux);
+        frag_color = mix(grayColor, otherComponentsColor, aux);
     }
 
     float auxlifeLocation;

@@ -17,6 +17,24 @@ using namespace m1;
  */
 
 // Function for checking collision between any game component.
+//bool CheckBorders(glm::vec3 center1, glm::vec3 center2, float radius1, float radius2) 
+//{
+//    float d = glm::distance(center1, center2);
+//    if (d >= 0 && d <= 25) {
+//        return true;
+//    }
+//
+//    return false;
+//}
+
+bool CheckBorders(glm::vec3 center) {
+    if (center.x <= -25 && center.x >= 25 && center.z <= -25) {
+        return true;
+    }
+
+    return false;
+}
+
 bool CheckCollision(glm::vec3 center1, glm::vec3 center2, float radius1, float radius2)
 {
     float distance = glm::distance(center2, center1);
@@ -350,7 +368,7 @@ void Tema2::Init()
 
     tank e;
 
-    for (int j = 0; j < 7; j++) {
+    for (int j = 0; j < 10; j++) {
         CreateEnemy(e, j + 1);
     }
 
@@ -359,7 +377,7 @@ void Tema2::Init()
 
     building b;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 15; i++) {
         CreateBuilding(b, i + 1);
     }
 
@@ -520,6 +538,12 @@ void Tema2::Update(float deltaTimeSeconds)
         );
     }
 
+    for (auto e : enemies) {
+        if (e.HP <= 0) {
+            score += 100;
+        }
+    }
+
     // Here I remove ech enemy with HP smaller than 0.
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(), [](const auto e) {
@@ -538,14 +562,7 @@ void Tema2::Update(float deltaTimeSeconds)
 
             player.bodyPos += -0.5f * p;
             e.bodyPos += 0.5f * p;
-            //camera->position += -0.5f * p;
-
-            if (!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT)) {
-                camera->position += -0.5f * p;
-            }
-            else {
-                camera->position += -0.5f * p;
-            }
+            camera->position += -0.5f * p;
             
             e.turretPos += 0.5f * p;
             player.turretPos += -0.5f * p;
@@ -620,18 +637,13 @@ void Tema2::Update(float deltaTimeSeconds)
 
     finishTime += deltaTimeSeconds;
 
+    // Here the game finishes after 2 minutes passed since the beggining.
     if (finishTime > 120) {
-        exit(0);
-    }
-
-    // Render the camera target. This is useful for understanding where
-    // the rotation point is, when moving in third-person camera mode.
-    if (renderCameraTarget)
-    {
-        modelMatrix = glm::mat4(1);
-        modelMatrix *= glm::translate(modelMatrix, camera->GetTargetPosition());
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
-        RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
+        waitTime += deltaTimeSeconds;
+        if (waitTime > 10) {
+            cout << score << endl;
+            exit(0);
+        }
     }
 }
 
@@ -665,63 +677,62 @@ void Tema2::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix)
 void Tema2::OnInputUpdate(float deltaTime, int mods)
 {
     // move the camera only if MOUSE_RIGHT button is pressed
+    if (finishTime < 120) {
+        if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT)) {
 
-    if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
-    {
-        float cameraSpeed = 2.0f;
-    }
-    else {
-        if (window->KeyHold(GLFW_KEY_W)) {
-            player.bodyPos.z -= 2 * deltaTime * cos(player.angle);
-            player.trackPos1.z -= 2 * deltaTime * cos(player.angle);
-            player.trackPos2.z -= 2 * deltaTime * cos(player.angle);
-            player.trackAdjPos1.z -= 2 * deltaTime * cos(player.angle);
-            player.trackAdjPos2.z -= 2 * deltaTime * cos(player.angle);
-            player.turretPos.z -= 2 * deltaTime * cos(player.angle);
-            player.cannonPos.z -= 2 * deltaTime * cos(player.angle);
+        } else {
+            if (window->KeyHold(GLFW_KEY_W)) {
+                player.bodyPos.z -= 2 * deltaTime * cos(player.angle);
+                player.trackPos1.z -= 2 * deltaTime * cos(player.angle);
+                player.trackPos2.z -= 2 * deltaTime * cos(player.angle);
+                player.trackAdjPos1.z -= 2 * deltaTime * cos(player.angle);
+                player.trackAdjPos2.z -= 2 * deltaTime * cos(player.angle);
+                player.turretPos.z -= 2 * deltaTime * cos(player.angle);
+                player.cannonPos.z -= 2 * deltaTime * cos(player.angle);
 
 
-            player.bodyPos.x += 2 * deltaTime * sin(player.angle);
-            player.trackPos1.x += 2 * deltaTime * sin(player.angle);
-            player.trackPos2.x += 2 * deltaTime * sin(player.angle);
-            player.trackAdjPos1.x += 2 * deltaTime * sin(player.angle);
-            player.trackAdjPos2.x += 2 * deltaTime * sin(player.angle);
-            player.turretPos.x += 2 * deltaTime * sin(player.angle);
-            player.cannonPos.x += 2 * deltaTime * sin(player.angle);
+                player.bodyPos.x += 2 * deltaTime * sin(player.angle);
+                player.trackPos1.x += 2 * deltaTime * sin(player.angle);
+                player.trackPos2.x += 2 * deltaTime * sin(player.angle);
+                player.trackAdjPos1.x += 2 * deltaTime * sin(player.angle);
+                player.trackAdjPos2.x += 2 * deltaTime * sin(player.angle);
+                player.turretPos.x += 2 * deltaTime * sin(player.angle);
+                player.cannonPos.x += 2 * deltaTime * sin(player.angle);
 
-            camera->TranslateForward(2 * deltaTime);
-        }
+                camera->TranslateForward(2 * deltaTime);
+            }
 
-        if (window->KeyHold(GLFW_KEY_S)) {
-            player.bodyPos.z += 2 * deltaTime * cos(player.angle);
-            player.trackPos1.z += 2 * deltaTime * cos(player.angle);
-            player.trackPos2.z += 2 * deltaTime * cos(player.angle);
-            player.trackAdjPos1.z += 2 * deltaTime * cos(player.angle);
-            player.trackAdjPos2.z += 2 * deltaTime * cos(player.angle);
-            player.turretPos.z += 2 * deltaTime * cos(player.angle);
-            player.cannonPos.z += 2 * deltaTime * cos(player.angle);
+            if (window->KeyHold(GLFW_KEY_S)) {
+                player.bodyPos.z += 2 * deltaTime * cos(player.angle);
+                player.trackPos1.z += 2 * deltaTime * cos(player.angle);
+                player.trackPos2.z += 2 * deltaTime * cos(player.angle);
+                player.trackAdjPos1.z += 2 * deltaTime * cos(player.angle);
+                player.trackAdjPos2.z += 2 * deltaTime * cos(player.angle);
+                player.turretPos.z += 2 * deltaTime * cos(player.angle);
+                player.cannonPos.z += 2 * deltaTime * cos(player.angle);
 
-            player.bodyPos.x -= 2 * deltaTime * sin(player.angle);
-            player.trackPos1.x -= 2 * deltaTime * sin(player.angle);
-            player.trackPos2.x -= 2 * deltaTime * sin(player.angle);
-            player.trackAdjPos1.x -= 2 * deltaTime * sin(player.angle);
-            player.trackAdjPos2.x -= 2 * deltaTime * sin(player.angle);
-            player.turretPos.x -= 2 * deltaTime * sin(player.angle);
-            player.cannonPos.x -= 2 * deltaTime * sin(player.angle);
+                player.bodyPos.x -= 2 * deltaTime * sin(player.angle);
+                player.trackPos1.x -= 2 * deltaTime * sin(player.angle);
+                player.trackPos2.x -= 2 * deltaTime * sin(player.angle);
+                player.trackAdjPos1.x -= 2 * deltaTime * sin(player.angle);
+                player.trackAdjPos2.x -= 2 * deltaTime * sin(player.angle);
+                player.turretPos.x -= 2 * deltaTime * sin(player.angle);
+                player.cannonPos.x -= 2 * deltaTime * sin(player.angle);
 
-            camera->TranslateForward(-2 * deltaTime);
-        }
+                camera->TranslateForward(-2 * deltaTime);
+            }
 
-        if (window->KeyHold(GLFW_KEY_A)) {
-            player.angle -= 2 * deltaTime;
-            player.angularStep -= 2 * deltaTime;
-            camera->RotateThirdPerson_OY(2 * deltaTime);
-        }
+            if (window->KeyHold(GLFW_KEY_A)) {
+                player.angle -= 2 * deltaTime;
+                player.angularStep -= 2 * deltaTime;
+                camera->RotateThirdPerson_OY(2 * deltaTime);
+            }
 
-        if (window->KeyHold(GLFW_KEY_D)) {
-            player.angle += 2 * deltaTime;
-            player.angularStep += 2 * deltaTime;
-            camera->RotateThirdPerson_OY(-2 * deltaTime);
+            if (window->KeyHold(GLFW_KEY_D)) {
+                player.angle += 2 * deltaTime;
+                player.angularStep += 2 * deltaTime;
+                camera->RotateThirdPerson_OY(-2 * deltaTime);
+            }
         }
     }
 }
@@ -790,7 +801,6 @@ void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 
         player.projectiles.push_back(p);
 
-        time = 0;
         AddMeshToList(p.sphere);
 
         if (player.projectiles.size() > 0) {
