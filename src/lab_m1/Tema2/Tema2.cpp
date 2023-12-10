@@ -313,6 +313,7 @@ void Tema2::Init()
     player.cannonPos = glm::vec3(0.4, 0.5, 0.8);
 
     player.angle = 0;
+    player.angularStep = 0;
 
     player.body = object3D::CreatePyramid("playerBody", glm::vec3(), 0.8, 2, 0.7, 1.75, 0.3, glm::vec3(0, 0, 0), true);
     AddMeshToList(player.body);
@@ -394,7 +395,7 @@ void Tema2::Update(float deltaTimeSeconds)
 
     modelMatrix = glm::mat4(1.0f);
     modelMatrix *= transform3D::Translate(player.turretPos.x, player.turretPos.y, player.turretPos.z);
-    modelMatrix *= transform3D::RotateOY(player.angle);
+    modelMatrix *= transform3D::RotateOY(player.angularStep);
     RenderMesh(meshes["playerTurret"], shaders["VertexColor"], modelMatrix);
 
     modelMatrix = glm::mat4(1.0f);
@@ -428,7 +429,7 @@ void Tema2::Update(float deltaTimeSeconds)
     modelMatrix = glm::mat4(1.0f);
     modelMatrix *= transform3D::Translate(player.cannonPos.x, player.cannonPos.y, player.cannonPos.z);
     modelMatrix *= transform3D::Translate(0, 0, 0.2);
-    modelMatrix *= transform3D::RotateOY(player.angle);
+    modelMatrix *= transform3D::RotateOY(player.angularStep);
     modelMatrix *= transform3D::Translate(0, 0, -0.2);
     RenderMesh(meshes["playerCannon"], shaders["VertexColor"], modelMatrix);
 
@@ -537,14 +538,14 @@ void Tema2::Update(float deltaTimeSeconds)
 
             player.bodyPos += -0.5f * p;
             e.bodyPos += 0.5f * p;
-            camera->position += -0.5f * p;
+            //camera->position += -0.5f * p;
 
-          /*  if (!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT)) {
+            if (!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT)) {
                 camera->position += -0.5f * p;
             }
             else {
-                camera->position += 0.5f * p;
-            }*/
+                camera->position += -0.5f * p;
+            }
             
             e.turretPos += 0.5f * p;
             player.turretPos += -0.5f * p;
@@ -713,13 +714,13 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
 
         if (window->KeyHold(GLFW_KEY_A)) {
             player.angle -= 2 * deltaTime;
-            angularStep -= 2 * deltaTime;
+            player.angularStep -= 2 * deltaTime;
             camera->RotateThirdPerson_OY(2 * deltaTime);
         }
 
         if (window->KeyHold(GLFW_KEY_D)) {
             player.angle += 2 * deltaTime;
-            angularStep += 2 * deltaTime;
+            player.angularStep += 2 * deltaTime;
             camera->RotateThirdPerson_OY(-2 * deltaTime);
         }
     }
@@ -760,7 +761,7 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
         camera->RotateThirdPerson_OY(-sensivityOY * deltaX);
     }
     else {
-        //angularStep += deltaX * 0.002f;
+        player.angularStep += deltaX * 0.002f;
     }
 }
 
@@ -772,7 +773,7 @@ void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
         counterProjectile = 0;
         projectile p;
 
-        p.angularStep = player.angle;
+        p.angularStep = player.angularStep;
 
         float x = player.turretPos.x + 1.4 * sin(p.angularStep);
         float y = player.turretPos.y;

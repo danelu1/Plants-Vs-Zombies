@@ -47,6 +47,7 @@ namespace m1
 
             float time;
             float angle;
+            float angularStep;
             bool isMoving;
             int choice;
 
@@ -129,8 +130,6 @@ namespace m1
         tank player;
         std::vector<tank> enemies;
         std::vector<building> buildings;
-
-        float angularStep = 0;
 
         float counterProjectile = 0;
         float time = 0;
