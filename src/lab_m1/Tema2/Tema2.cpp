@@ -17,16 +17,6 @@ using namespace m1;
  */
 
 // Function for checking collision between any game component.
-//bool CheckBorders(glm::vec3 center1, glm::vec3 center2, float radius1, float radius2) 
-//{
-//    float d = glm::distance(center1, center2);
-//    if (d >= 0 && d <= 25) {
-//        return true;
-//    }
-//
-//    return false;
-//}
-
 bool CheckBorders(glm::vec3 center) {
     if (center.x <= -25 && center.x >= 25 && center.z <= -25) {
         return true;
@@ -314,9 +304,11 @@ void Tema2::Init()
     fov = 50;
 
     camera = new implemented::Camera1();
-    camera->Set(glm::vec3(0.4f, 0.25, 4.f), glm::vec3(0.4f, 0.25, 0), glm::vec3(0, 1, 0));
+    camera->Set(glm::vec3(0.4f, 0.25f, 4.f), glm::vec3(0.4f, 0.25f, 0), glm::vec3(0, 1, 0));
     aux = new implemented::Camera1();
     aux->Set(glm::vec3(0.4f, 0.25, 4.f), glm::vec3(0.4f, 0.25, 0), glm::vec3(0, 1, 0));
+
+    camera->RotateThirdPerson_OX(RADIANS(-15));
 
     projectionMatrix = glm::perspective(RADIANS(60), window->props.aspectRatio, 0.01f, 200.0f);
 
@@ -392,6 +384,7 @@ void Tema2::Init()
 void Tema2::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
+    window->DisablePointer();
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -650,7 +643,6 @@ void Tema2::Update(float deltaTimeSeconds)
 
 void Tema2::FrameEnd()
 {
-    DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
 }
 
 
@@ -699,7 +691,7 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
                 player.turretPos.x += 2 * deltaTime * sin(player.angle);
                 player.cannonPos.x += 2 * deltaTime * sin(player.angle);
 
-                camera->TranslateForward(2 * deltaTime);
+                camera->MoveForward(2 * deltaTime);
             }
 
             if (window->KeyHold(GLFW_KEY_S)) {
@@ -719,7 +711,7 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
                 player.turretPos.x -= 2 * deltaTime * sin(player.angle);
                 player.cannonPos.x -= 2 * deltaTime * sin(player.angle);
 
-                camera->TranslateForward(-2 * deltaTime);
+                camera->MoveForward(-2 * deltaTime);
             }
 
             if (window->KeyHold(GLFW_KEY_A)) {
@@ -759,7 +751,7 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
         float sensivityOX = 0.001f;
         float sensivityOY = 0.001f;
 
-        if (renderCameraTarget == false) {
+        if (!renderCameraTarget) {
             renderCameraTarget = true;
             aux->Set(camera->position, glm::vec3(0.4f, 0.25, 0), camera->up);
             aux->position = camera->position;
